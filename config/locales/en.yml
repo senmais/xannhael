@@ -52,6 +52,8 @@ en:
       turbo_frames_text: "Scopes navigation to parts of the page, so only the frame that changes is updated."
       turbo_streams_title: "Turbo Streams"
       turbo_streams_text: "Broadcasts partial updates to every connected client over WebSockets."
+      toast_title: "Native toast"
+      toast_text: "Sends a toast from the web app to the native Android shell."
     kamal:
       title: "Deploys that feel like magic"
       intro: "Kamal ships your app to any server over SSH: provision, build, and deploy without a platform."
@@ -81,3 +83,5 @@ en:
     privacy: "Privacy"
     terms: "Terms"
     toggle_theme: "Toggle theme"
+    demo: "Toast"
+    demo_toast: "Hello from Hotwire Native!"

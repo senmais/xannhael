@@ -26,10 +26,24 @@
   </head>
 
   <body class="min-h-screen flex flex-col bg-surface-muted text-foreground transition-colors duration-300">
-    <%= render "shared/navbar" %>
+    <% if hotwire_native_app? %>
+      <%= tag.span data: { 
+        controller: "bridge--navbar", 
+        bridge_navbar_title: @option&.capitalize } %>
+    <% else %>
+      <%= render "shared/navbar" %>
+    <% end %>
+
     <main class="container mx-auto mt-10 px-5 flex flex-1 w-full">
       <%= yield %>
     </main>
-    <%= render "shared/footer" %>
+
+    <%= render "shared/footer" unless hotwire_native_app? %>
+
+    <%= turbo_frame_tag "toast" do %>
+      <% if notice = flash[:notice] %>
+        <%= render "shared/toast", message: notice %>
+      <% end %>
+    <% end %>
   </body>
 </html>
