@@ -1,8 +1,9 @@
 #!/usr/bin/env sh
 
-if ! gem list foreman -i --silent; then
-  echo "Installing foreman..."
-  gem install foreman
+if ! command -v overmind >/dev/null 2>&1; then
+  echo "overmind is not installed."
+  echo "Install it (and tmux) via the devcontainer, e.g. .devcontainer/Dockerfile."
+  exit 1
 fi
 
 # Default to port 3000 if not specified
@@ -13,4 +14,11 @@ export PORT="${PORT:-3000}"
 export RUBY_DEBUG_OPEN="true"
 export RUBY_DEBUG_LAZY="true"
 
-exec foreman start -f Procfile.dev "$@"
+# Remove a stale socket left behind when a previous session crashed;
+# overmind status exits non-zero when no server is actually running
+if [ -S ./.overmind.sock ] && ! overmind status >/dev/null 2>&1; then
+  echo "Removing stale Overmind socket ./.overmind.sock"
+  rm -f ./.overmind.sock
+fi
+
+exec overmind start -f Procfile.dev "$@"
