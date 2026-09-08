@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "toast" do %>
+  <%= render "shared/toast", message: flash.now[:notice] %>
+<% end %>

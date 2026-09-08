@@ -4,4 +4,10 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  helper_method :hotwire_native_app?
+
+  private
+
+  def hotwire_native_app? = request.user_agent.to_s.include?("Hotwire Native")
 end

@@ -1,0 +1,19 @@
+<% type = type || :success %>
+<% color_class = case type.to_sym
+     when :notice then "bg-notice text-notice-foreground"
+     when :error then "bg-error text-error-foreground"
+     else "bg-success text-success-foreground"
+   end
+%>
+<div class="toast opacity-0 translate-y-2 pointer-events-none <%= color_class %>"
+    data-controller="toast bridge--toast"
+    data-bridge-toast-message="<%= message %>"
+    role="status"
+    aria-live="polite">
+  <%= tag.svg class: "w-5 h-5 shrink-0 mt-0.5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+      stroke_width: 2, stroke_linecap: "round", stroke_linejoin: "round", aria_hidden: true do %>
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+  <% end %>
+  <span><%= message %></span>
+</div>

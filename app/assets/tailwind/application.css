@@ -20,6 +20,10 @@
   --color-link: var(--link);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-notice: var(--notice);
+  --color-notice-foreground: var(--notice-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-danger: var(--danger);
@@ -49,6 +53,10 @@
   --link: oklch(0.5013 0.1783 28.7);
   --success: oklch(0.5285 0.1061 154.6);
   --success-foreground: oklch(1 0 89.9);
+  --notice: oklch(0.546 0.18 262);
+  --notice-foreground: oklch(1 0 89.9);
+  --error: oklch(0.577 0.245 27.3);
+  --error-foreground: oklch(1 0 89.9);
   --warning: oklch(0.8848 0.1816 94.9);
   --warning-foreground: oklch(0.209 0 89.9);
   --danger: oklch(0.5013 0.1783 28.7);
@@ -78,6 +86,10 @@
   --link: oklch(0.6905 0.1645 21);
   --success: oklch(0.7732 0.0906 125.8);
   --success-foreground: oklch(0.209 0 89.9);
+  --notice: oklch(0.68 0.15 255);
+  --notice-foreground: oklch(0.209 0 89.9);
+  --error: oklch(0.68 0.2 25);
+  --error-foreground: oklch(0.209 0 89.9);
   --warning: oklch(0.8848 0.1816 94.9);
   --warning-foreground: oklch(0.209 0 89.9);
   --danger: oklch(0.6905 0.1645 21);
@@ -120,5 +132,9 @@
 
   .step-badge {
     @apply inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-bold mb-4;
+  }
+
+  .toast {
+    @apply fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 py-3 rounded-xl border border-white/10 shadow-xl flex items-start gap-3 text-sm font-medium leading-snug transition-all duration-300 ease-out;
   }
 }

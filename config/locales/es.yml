@@ -52,6 +52,8 @@ es:
       turbo_frames_text: "Acota la navegación a partes de la página, así solo se actualiza el frame que cambia."
       turbo_streams_title: "Turbo Streams"
       turbo_streams_text: "Transmite actualizaciones parciales a cada cliente conectado mediante WebSockets."
+      toast_title: "Toast nativo"
+      toast_text: "Envía un toast desde la web al shell nativo de Android."
     kamal:
       title: "Despliegues que parecen magia"
       intro: "Kamal lleva tu app a cualquier servidor por SSH: provisiona, construye y despliega sin una plataforma."
@@ -81,3 +83,5 @@ es:
     privacy: "Privacidad"
     terms: "Términos"
     toggle_theme: "Cambiar tema"
+    demo: "Toast"
+    demo_toast: "¡Hola desde Hotwire Native!"
