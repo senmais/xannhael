@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Debug builds talk to the local Rails server over plain HTTP (10.0.2.2).
+         Release builds keep cleartext disabled and require HTTPS. -->
+    <application android:usesCleartextTraffic="true" />
+
+</manifest>

@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Xannhael" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Keep the back button visible when dark mode is forced via the Theme bridge component. -->
+        <item name="toolbarNavigationButtonStyle">@style/Widget.Xannhael.Toolbar.Navigation.Tinted</item>
+    </style>
+
+    <style name="Widget.Xannhael.Toolbar.Navigation.Tinted" parent="Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="tint">?colorOnSurface</item>
+    </style>
+</resources>
