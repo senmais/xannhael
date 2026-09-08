@@ -67,5 +67,7 @@
   "onCreateCommand": "docker start postgres-db >/dev/null 2>&1 || true",
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "bin/setup --skip-server"
+  // The workspace is bind-mounted with root ownership, so whitelist it for git
+  // (otherwise the VS Code Git extension reports "dubious ownership" and shows nothing).
+  "postCreateCommand": "git config --global --add safe.directory /workspaces/xannhael && bin/setup --skip-server"
 }
