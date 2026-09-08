@@ -57,8 +57,12 @@ group :development, :test do
 end
 
 group :development do
-  # Use console on exceptions pages [https://github.com/rails/web-console]
+  # Use console on exceptions pages [https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-web-console]
   gem "web-console"
+
+  # Language servers for editor integration
+  gem "ruby-lsp", require: false
+  gem "ruby-lsp-rails", require: false
 end
 
 group :test do

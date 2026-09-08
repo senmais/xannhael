@@ -18,10 +18,11 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  <% if ENV["DB_HOST"] %>
-  host: <%= ENV["DB_HOST"] %>
-  username: postgres
-  password: postgres
+  <% if ENV["DB_HOST"] && (db_creds = Rails.application.credentials.database) %>
+  host: <%= db_creds.host %>
+  port: <%= db_creds.port %>
+  username: <%= db_creds.username %>
+  password: <%= db_creds.password %>
   <% end %>
 
 

@@ -11,25 +11,60 @@
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/rails/devcontainer/features/activestorage": {},
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {"moby":false},
-    "ghcr.io/rails/devcontainer/features/postgres-client": {}
+    "ghcr.io/rails/devcontainer/features/postgres-client": {},
+    // Node powers the stimulus-lsp language server
+    "ghcr.io/devcontainers/features/node:1": {}
   },
 
   "containerEnv": {
     "CAPYBARA_SERVER_PORT": "45678",
     "SELENIUM_HOST": "selenium",
     "KAMAL_REGISTRY_PASSWORD": "$KAMAL_REGISTRY_PASSWORD",
-    "DB_HOST": "postgres"
+    // DB_HOST triggers the shared postgres-db connection from config/database.yml
+    "DB_HOST": "host.docker.internal",
+    // API keys from the host so codex/opencode authenticate without logging in
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
+    "OPENCODE_API_KEY": "${localEnv:OPENCODE_API_KEY}",
+    // For the psql client
+    "PGHOST": "host.docker.internal",
+    "PGPORT": "55432",
+    "PGUSER": "postgres",
+    "PGPASSWORD": "postgres"
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [3000, 5432],
+  "forwardPorts": [3000],
 
   // Configure tool-specific properties.
-  // "customizations": {},
+  "customizations": {
+    "vscode": {
+      // The Rails image provides ruby on PATH via mise; stop ruby-lsp from probing asdf/mise on its own
+      "settings": {
+        "rubyLsp.rubyVersionManager": "none"
+      },
+      "extensions": [
+        // Ruby on Rails
+        "Shopify.ruby-lsp",
+        "koichisasada.vscode-rdbg",
+        "jemmyw.rails-fast-nav",
+        "aliariff.vscode-erb-beautify",
+        // Hotwire / Stimulus / Tailwind
+        "marcoroth.stimulus-lsp",
+        "bradlc.vscode-tailwindcss",
+        // Git
+        "mhutchie.git-graph",
+        "github.vscode-pull-request-github",
+        // CI
+        "github.vscode-github-actions"
+      ]
+    }
+  },
 
   // Uncomment to connect as root instead. More info: https://containers.dev/implementors/json_reference/#remoteUser.
   // "remoteUser": "root",
 
+  // Ensure the shared postgres-db container is running before setting up the app
+  "onCreateCommand": "docker start postgres-db >/dev/null 2>&1 || true",
 
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "bin/setup --skip-server"
