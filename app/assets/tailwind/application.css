@@ -1,1 +1,124 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-muted: var(--border-muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-link: var(--link);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-focus: var(--focus);
+  --color-footer-bg: var(--footer-bg);
+  --color-logo-bg: var(--logo-bg);
+  --color-logo-fg: var(--logo-fg);
+}
+
+:root {
+  --background: oklch(1 0 89.9);
+  --foreground: oklch(0.209 0 89.9);
+  --muted: oklch(0.5103 0 89.9);
+  --surface: oklch(0.9826 0.0017 67.8);
+  --surface-muted: oklch(0.9651 0.0034 67.8);
+  --border: oklch(0.9219 0 89.9);
+  --border-muted: oklch(0.9398 0.0013 106.4);
+  --primary: oklch(0.5297 0.2077 27.7);
+  --primary-foreground: oklch(1 0 89.9);
+  --primary-muted: oklch(0.5297 0.2077 27.7 / 0.1);
+  --primary-hover: oklch(0.6224 0.2111 24.8);
+  --accent: oklch(0.8848 0.1816 94.9);
+  --accent-foreground: oklch(0.209 0 89.9);
+  --link: oklch(0.5013 0.1783 28.7);
+  --success: oklch(0.5285 0.1061 154.6);
+  --success-foreground: oklch(1 0 89.9);
+  --warning: oklch(0.8848 0.1816 94.9);
+  --warning-foreground: oklch(0.209 0 89.9);
+  --danger: oklch(0.5013 0.1783 28.7);
+  --danger-foreground: oklch(1 0 89.9);
+  --info: oklch(0.7487 0.0631 185.5);
+  --info-foreground: oklch(0.209 0 89.9);
+  --focus: oklch(0.5297 0.2077 27.7 / 0.6);
+  --footer-bg: oklch(0.9355 0.0052 67.8);
+  --logo-bg: oklch(0.5297 0.2077 27.7);
+  --logo-fg: oklch(1 0 89.9);
+}
+
+:root.dark {
+  --background: oklch(0.209 0 89.9);
+  --foreground: oklch(0.9651 0.0034 67.8);
+  --muted: oklch(0.7345 0.0014 106.4);
+  --surface: oklch(0.2809 0 89.9);
+  --surface-muted: oklch(0.325 0 89.9);
+  --border: oklch(0.3456 0.0014 17.2);
+  --border-muted: oklch(0.3208 0.001 89.9);
+  --primary: oklch(0.6224 0.2111 24.8);
+  --primary-foreground: oklch(1 0 89.9);
+  --primary-muted: oklch(0.6224 0.2111 24.8 / 0.15);
+  --primary-hover: oklch(0.6905 0.1645 21);
+  --accent: oklch(0.8848 0.1816 94.9);
+  --accent-foreground: oklch(0.209 0 89.9);
+  --link: oklch(0.6905 0.1645 21);
+  --success: oklch(0.7732 0.0906 125.8);
+  --success-foreground: oklch(0.209 0 89.9);
+  --warning: oklch(0.8848 0.1816 94.9);
+  --warning-foreground: oklch(0.209 0 89.9);
+  --danger: oklch(0.6905 0.1645 21);
+  --danger-foreground: oklch(0.209 0 89.9);
+  --info: oklch(0.7487 0.0631 185.5);
+  --info-foreground: oklch(0.209 0 89.9);
+  --focus: oklch(0.6224 0.2111 24.8 / 0.6);
+  --footer-bg: oklch(0.2603 0 89.9);
+  --logo-bg: oklch(0.9651 0.0034 67.8);
+  --logo-fg: oklch(0.209 0 89.9);
+}
+
+[data-theme-icon="sun"] {
+  display: none;
+}
+
+.dark [data-theme-icon="moon"] {
+  display: none;
+}
+
+.dark [data-theme-icon="sun"] {
+  display: block;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@layer components {
+  .card {
+    @apply bg-surface rounded-xl border border-border p-6 sm:p-8;
+  }
+
+  .step-badge {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-bold mb-4;
+  }
+}

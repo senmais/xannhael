@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Xannhael">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#C81418">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -19,13 +20,16 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="min-h-screen flex flex-col bg-surface-muted text-foreground transition-colors duration-300">
+    <%= render "shared/navbar" %>
+    <main class="container mx-auto mt-10 px-5 flex flex-1 w-full">
       <%= yield %>
     </main>
+    <%= render "shared/footer" %>
   </body>
 </html>
