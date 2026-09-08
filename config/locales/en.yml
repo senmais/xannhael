@@ -1,31 +1,83 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  hero:
+    ruby_title_line1: "Build modern apps with "
+    ruby_title_accent: "Rails"
+    ruby_title_line2: " and Hotwire"
+    ruby_description: "A full-stack framework with batteries included: real-time UI, background jobs, and caching out of the box."
+    hotwire_title_line1: "Interfaces that update instantly with "
+    hotwire_title_accent: "Hotwire"
+    hotwire_title_line2: ""
+    hotwire_description: "Turbo and Stimulus together deliver snappy, server-rendered UIs with a fraction of the JavaScript."
+    kamal_title_line1: "Ship to production with a single command — "
+    kamal_title_accent: "Kamal"
+    kamal_title_line2: ""
+    kamal_description: "Zero-downtime deployments to any server, with a built-in proxy, TLS, and asset handling."
+    omarchy_title_line1: "A calm workspace inspired by "
+    omarchy_title_accent: "Omarchy"
+    omarchy_title_line2: ""
+    omarchy_description: "A warm, minimal theme pairing the Rails Guides aesthetic with the Everforest palette."
+    ruby_docs: "Ruby on Rails documentation"
+    hotwire_docs: "Hotwire documentation"
+    kamal_docs: "Kamal documentation"
+    omarchy_docs: "Omarchy documentation"
+    ruby_docs_url: "https://rubyonrails.org/"
+    hotwire_docs_url: "https://hotwired.dev/"
+    kamal_docs_url: "https://kamal-deploy.org/"
+    omarchy_docs_url: "https://github.com/sainnhe/everforest"
+  home:
+    ruby:
+      cards:
+        c1_title: "Turbo"
+        c1_strong: "Real-time UI."
+        c1_text: "Turbo Streams and Frames update the page live, with no hand-written JavaScript."
+        c2_title: "Solid Queue"
+        c2_strong: "Background jobs."
+        c2_text: "Heavy work runs reliably off the request cycle, ready to scale."
+        c3_title: "Solid Cache"
+        c3_strong: "Speed by default."
+        c3_text: "Database-backed and asset caching keep responses fast out of the box."
+        c4_title: "Conventions"
+        c4_strong: "Ship faster."
+        c4_text: "Convention over configuration gets you from zero to production in record time."
+    hotwire:
+      title: "Three tools, one philosophy"
+      intro: "Hotwire replaces the heavy SPA stack with server-rendered HTML that updates in real time."
+      benefits:
+        b1: "No JSON APIs or client-side state to maintain"
+        b2: "Works with plain Rails controllers and views"
+        b3: "Progressively enhances with a little Stimulus"
+      turbo_drive_title: "Turbo Drive"
+      turbo_drive_text: "Speeds up navigation by swapping the page body while preserving the full page lifecycle."
+      turbo_frames_title: "Turbo Frames"
+      turbo_frames_text: "Scopes navigation to parts of the page, so only the frame that changes is updated."
+      turbo_streams_title: "Turbo Streams"
+      turbo_streams_text: "Broadcasts partial updates to every connected client over WebSockets."
+    kamal:
+      title: "Deploys that feel like magic"
+      intro: "Kamal ships your app to any server over SSH: provision, build, and deploy without a platform."
+      step1_title: "Provision"
+      step1_text: "Kamal installs Docker and sets up the proxy and TLS on a fresh server."
+      step2_title: "Build"
+      step2_text: "A production image is built with Rails assets precompiled and compressed."
+      step3_title: "Deploy"
+      step3_text: "Zero-downtime rolling deploys with instant rollbacks when something goes wrong."
+      terminal_title: "terminal"
+    omarchy:
+      title: "What is Omarchy?"
+      text1: "Omarchy is a calm, minimal theme built on Rails and Hotwire, styled after the Ruby on Rails Guides."
+      text2: "Its palette comes from Everforest, a green-tinted scheme designed to reduce eye strain and keep focus."
+      image_alt: "Everforest color scheme preview"
+      palette_title: "Everforest at a glance"
+  footer:
+    copyright: "Xannhael. All rights reserved."
+    privacy: "Privacy"
+    terms: "Terms"
+  navbar:
+    brand: "Xannhael"
+    ruby: "Ruby"
+    hotwire: "Hotwire"
+    kamal: "Kamal"
+    omarchy: "Omarchy"
+    privacy: "Privacy"
+    terms: "Terms"
+    toggle_theme: "Toggle theme"

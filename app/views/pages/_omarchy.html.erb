@@ -1,0 +1,19 @@
+<div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center py-10 sm:py-14">
+  <div class="space-y-4">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-foreground"><%= t("home.omarchy.title") %></h2>
+    <p class="text-base text-muted leading-relaxed"><%= t("home.omarchy.text1") %></p>
+    <p class="text-base text-muted leading-relaxed"><%= t("home.omarchy.text2") %></p>
+    <div class="pt-2">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted mb-3"><%= t("home.omarchy.palette_title") %></p>
+      <div class="flex gap-2">
+        <% [["bg-[#2F383E]", "bg0"], ["bg-[#D3C6AA]", "fg"], ["bg-[#A7C080]", "green"], ["bg-[#E67E80]", "red"], ["bg-[#7FBBB3]", "aqua"]].each do |color, label| %>
+          <%= tag.div "", title: label, class: "w-12 h-12 rounded-lg border border-border #{color}" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div>
+    <%= image_tag "example/everforest.webp", alt: t("home.omarchy.image_alt"),
+        class: "w-full h-auto rounded-xl border border-border" %>
+  </div>
+</div>

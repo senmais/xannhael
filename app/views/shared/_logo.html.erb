@@ -1,0 +1,7 @@
+<%= link_to root_path, title: t("navbar.brand"), aria: { label: t("navbar.brand") },
+    class: "shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-logo-bg text-logo-fg" do %>
+  <%= tag.svg viewBox: "0 0 24 24", class: "w-full h-full", aria_hidden: true do %>
+    <path d="M2.5 2.5l19 19M21.5 2.5l-19 19" fill="none" stroke="currentColor"
+        stroke_width: 6, stroke_linecap: "square"></path>
+  <% end %>
+<% end %>

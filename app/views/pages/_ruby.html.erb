@@ -1,0 +1,11 @@
+<div class="grid sm:grid-cols-2 gap-4 sm:gap-6 py-10 sm:py-14">
+  <% 4.times do |i| %>
+    <div class="card">
+      <%= tag.span format("%02d", i + 1), class: "step-badge" %>
+      <%= tag.h3 t("home.ruby.cards.c#{i + 1}_title"), class: "text-base sm:text-lg font-bold text-foreground mb-2" %>
+      <%= tag.p class: "text-sm text-muted leading-relaxed" do %>
+        <%= tag.strong t("home.ruby.cards.c#{i + 1}_strong"), class: "text-foreground" %> <%= t("home.ruby.cards.c#{i + 1}_text") %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,35 @@
+<section class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col">
+  <%= turbo_frame_tag "hero" do %>
+    <div class="text-center pt-8 sm:pt-12 pb-10 sm:pb-14">
+      <article class="max-w-3xl mx-auto">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-tight">
+          <%= t("hero.#{@option}_title_line1") %>
+          <span class="text-primary"><%= t("hero.#{@option}_title_accent") %></span>
+          <%= t("hero.#{@option}_title_line2") %>
+        </h1>
+        <p class="mt-4 sm:mt-6 text-base sm:text-lg text-muted max-w-2xl mx-auto leading-relaxed">
+          <%= t("hero.#{@option}_description") %>
+        </p>
+
+        <% doc_url = t("hero.#{@option}_docs_url", default: "") %>
+        <% if doc_url.present? %>
+          <div class="mt-6 sm:mt-8 flex justify-center">
+            <%= link_to doc_url, target: "_blank", rel: "noopener noreferrer",
+                class: "inline-flex items-center gap-1.5 text-sm font-medium text-link underline underline-offset-4 hover:text-link/80 transition-colors" do %>
+              <%= tag.svg class: "w-3.5 h-3.5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+                  stroke_width: 2, stroke_linecap: "round", stroke_linejoin: "round", aria_hidden: true do %>
+                <path d="M14 3h7v7"></path>
+                <path d="M21 3l-9 9"></path>
+                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path>
+              <% end %>
+              <%= t("hero.#{@option}_docs") %>
+            <% end %>
+          </div>
+        <% end %>
+      </article>
+    </div>
+  <% end %>
+
+  <%= render "pages/#{@option}" %>
+
+</section>
