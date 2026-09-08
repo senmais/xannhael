@@ -19,6 +19,11 @@ gem "tailwindcss-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
+# Pin the JSON parser to the 2.x line that ActiveSupport 8.1 still expects.
+# json 3.x changed `JSON.parse` to keyword-only args and breaks the
+# ActiveSupport::JSON.decode call (used by Solid Queue job arguments).
+gem "json", "~> 2.0"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -29,6 +34,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
+
+# Web UI to inspect and retry/discard Solid Queue jobs
+gem "mission_control-jobs"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -57,6 +65,9 @@ group :development, :test do
 end
 
 group :development do
+  # Use SQLite as the local development database for the app and the solid_* services
+  gem "sqlite3", ">= 2.1"
+
   # Use console on exceptions pages [https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-web-console]
   gem "web-console"
 
