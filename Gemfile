@@ -19,9 +19,9 @@ gem "tailwindcss-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
-# Pin the JSON parser to the 2.x line that ActiveSupport 8.1 still expects.
-# json 3.x changed `JSON.parse` to keyword-only args and breaks the
-# ActiveSupport::JSON.decode call (used by Solid Queue job arguments).
+# JSON parser pinned to 2.x. json 3.x changed `JSON.parse` to keyword-only
+# args, which breaks ActiveSupport::JSON.decode and ActiveRecord::Type::Serialized
+# (the `arguments` column of Solid Queue jobs) on Rails 8.1. Do NOT bump to 3.x.
 gem "json", "~> 2.0"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
@@ -48,7 +48,9 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
+# Backend of image_processing 2.x (Vips); requires libvips system library
+gem "ruby-vips", "~> 2.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

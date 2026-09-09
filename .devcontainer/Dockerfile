@@ -15,9 +15,10 @@ ENV HOME="/home/vscode" \
 
 # gawk required: the codex installer breaks on Debian's mawk
 # tmux is a runtime dependency of overmind (it runs the Procfile in a tmux session)
+# libvips-dev: compile/build runtime for the ruby-vips gem (image_processing 2.x)
 USER root
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y gawk tmux && \
+    apt-get install --no-install-recommends -y gawk tmux libvips-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Pin bundler to the version used to generate Gemfile.lock (BUNDLED WITH).
