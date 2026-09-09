@@ -1,89 +1,67 @@
 # Xannhael
 
-Ruby on Rails 8 application. Runs on Ruby 4.0.2 with PostgreSQL as its primary
-database. In development, Solid Cache, Solid Queue and Solid Cable each run on
-their own SQLite3 file so no extra infrastructure is needed.
+> Un **template funcional** de Rails 8: una **app web** (Hotwire + Tailwind) y
+> un **cliente Android** (Hotwire Native) que hablan entre sí. Clónalo,
+> renómbralo y conviértelo en cualquier proyecto listo para desarrollo.
 
-## Requirements
+## Lo esencial en 30 segundos
 
-- Docker with the VS Code "Dev Containers" extension (recommended)
-- A shared Postgres container named `postgres-db` (port `55432 -> 5432` on the host)
+- **Web**: Ruby on Rails 8, Hotwire (Turbo + Stimulus), Tailwind CSS.
+- **Móvil**: cliente Android con la misma web dentro de un shell nativo.
+- **Fondo**: Solid Queue / Cache / Cable (trabajos, caché y websockets sobre la
+  propia base de datos).
+- **Despliegue**: Docker + Kamal + Thruster.
 
-## Quick start (devcontainer)
-
-1. Start the shared database container if it is not running:
-   ```bash
-   docker start postgres-db
-   ```
-   (`onCreateCommand` also tries to start it when the container boots.)
-
-2. Open the repo in VS Code and run **Dev Containers: Rebuild and Reopen in Container**.
-   The first build pulls the Rails Ruby image, Node and tooling — allow a few minutes.
-
-3. Start the app from the integrated terminal:
-   ```bash
-   bin/dev
-   ```
-   This runs the web server (http://localhost:3000), the Tailwind CSS watcher
-   and the Solid Queue worker via overmind.
-
-4. Inspect background jobs in Mission Control: http://localhost:3000/jobs
-
-Selenium is **not** started by default (it is only needed for system tests).
-Launch it on demand with:
-```bash
-docker compose -f .devcontainer/compose.yaml up -d selenium
+```mermaid
+flowchart LR
+    Web["App web Rails 8"] --> PG[(PostgreSQL)]
+    Android["App Android (Hotwire Native)"] --> Web
+    Web --> SQL[(SQLite · Queue/Cache/Cable)]
 ```
 
-## Environment variables
+## Quick start
 
-The devcontainer injects these from the host via `.devcontainer/devcontainer.json`
-(`${localEnv:...}`). Export them in your host shell profile so the tools
-authenticate automatically:
+Necesitas Docker + la extensión **Dev Containers** de VS Code.
 
-| Variable              | Used by  | Purpose                                |
-|-----------------------|----------|----------------------------------------|
-| `OPENAI_API_KEY`      | codex    | OpenAI authentication                  |
-| `OPENCODE_API_KEY`    | opencode | OpenCode Zen and Go providers          |
-| `KAMAL_REGISTRY_PASSWORD` | kamal | Registry authentication for deploys |
-
-`DB_HOST`, `PGHOST`, `PGPORT`, `PGUSER` and `PGPASSWORD` are set inside the
-devcontainer to reach the shared `postgres-db` container
-(`host.docker.internal:55432`, user `postgres`).
-
-## Database
-
-The primary database connection for development comes from the Rails
-credentials (`config/credentials.yml.enc`), under the `database` key (host,
-port, username, password). Edit it with:
-
+Este repositorio está preparado para usar un contenedor Postgres compartido:
+- **postgres-db** (puerto `55432 -> 5432`).
+- **Si no lo tienes**, crea uno con:
 ```bash
-bin/rails credentials:edit
+docker run -d --name postgres-db -p 55432:5432 -e POSTGRES_PASSWORD=postgres postgres:15
 ```
 
-`config/database.yml` defines the development setup: the primary database is
-PostgreSQL (`xannhael_development`), while Solid Cache, Solid Queue and Solid
-Cable use their own SQLite3 files under `storage/`. Run `bin/rails db:prepare`
-to create everything.
+```bash
+# 1. Arranca la base de datos compartida
+docker start postgres-db
 
-## Background jobs
+# 2. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
+# 3. Dentro del contenedor:
+bin/dev
+```
 
-- Solid Queue with the Mission Control web UI mounted at `/jobs`.
-- `bin/dev` starts `worker: bin/rails solid_queue:start` next to the web server.
-- Inspect, retry and discard jobs at http://localhost:3000/jobs.
+Listo: web en **http://localhost:3000** y Mission Control (trabajos) en
+**http://localhost:3000/jobs**.
 
-## Devcontainer tooling
+> ¿Es la primera vez y quieres entenderlo? Lee la
+> [documentación completa](docs/base/README.md) — empieza por la
+> [visión general](docs/base/01-vision-general.md).
 
-The container image installs codex and opencode (standalone binaries), overmind
-and tmux, and pins bundler to the lockfile version. Persistent named volumes
-keep codex/opencode sessions and authentication across container rebuilds:
+## Índice de documentación
 
-- `codex-home` → `/home/vscode/.codex`
-- `opencode-config` → `/home/vscode/.config/opencode`
-- `opencode-data` → `/home/vscode/.local/share/opencode`
+La guía completa vive en [`docs/base/`](docs/base/README.md), un archivo por
+tema. Ábrelo cuando lo necesites, sin agobios:
 
-VS Code extensions are installed automatically: Ruby LSP, Stimulus LSP, Tailwind
-CSS, rdbg, Rails fast nav, ERB beautify, Git Graph, GitHub PRs and GitHub Actions.
+| # | Tema | Resumen |
+|---|------|---------|
+| 01 | [Visión general](docs/base/01-vision-general.md) | Stack, arquitectura y flujo |
+| 02 | [Configuración](docs/base/02-configuracion.md) | Credenciales, variables de entorno, `database.yml` |
+| 03 | [Puesta en marcha](docs/base/03-puesta-en-marcha.md) | Devcontainer y cómo ejecutar la app |
+| 04 | [Arquitectura web](docs/base/04-arquitectura-web.md) | Rails, Hotwire, Stimulus y las rutas |
+| 05 | [La suite Solid](docs/base/05-solid-suite.md) | Solid Queue, Cache, Cable y Mission Control |
+| 06 | [App móvil Android](docs/base/06-app-movil.md) | Cliente Hotwire Native y el bridge |
+| 07 | [Despliegue a producción](docs/base/07-despliegue.md) | Docker, Kamal y Thruster |
+| 08 | [Pruebas y CI](docs/base/08-pruebas-y-ci.md) | Tests, RuboCop, Brakeman, GitHub Actions |
+| 09 | [Reutilizar como template](docs/base/09-renovar-template.md) | Renombrar el repo para un proyecto nuevo |
 
 ## Tests
 
@@ -91,3 +69,24 @@ CSS, rdbg, Rails fast nav, ERB beautify, Git Graph, GitHub PRs and GitHub Action
 bin/rails db:test:prepare
 bin/rails test
 ```
+
+## Crear un proyecto nuevo desde este template
+
+```bash
+git clone <this-template-url>
+cd <clone>
+bin/rails scaffold:rename SLUG=blog PACKAGE=com.acme.blog
+git remote add origin <tu-nuevo-repo>
+git add -A && git commit
+```
+
+Detalles en [09 · Reutilizar como template](docs/base/09-renovar-template.md).
+
+## Requisitos previos
+
+- Docker + VS Code Dev Containers
+- Un contenedor Postgres compartido `postgres-db` (puerto `55432 -> 5432`)
+
+---
+
+Documentación completa: [docs/base](docs/base/README.md) · Licencia: (añade la tuya)
