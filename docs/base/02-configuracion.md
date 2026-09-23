@@ -86,7 +86,7 @@ está **vacío a propósito**:
 |----------|-----------|-----------|
 | `OPENAI_API_KEY` | codex | Autenticación OpenAI |
 | `OPENCODE_API_KEY` | opencode | Proveedores Zen y Go |
-| `GITHUB_TOKEN` / `GH_TOKEN` | `gh` CLI dentro del contenedor | Evita `gh auth login` |
+| `GITHUB_TOKEN` / `GH_TOKEN` | `gh` + `git push` (HTTPS) | Autenticación de GitHub: la usa `gh` y el helper de credenciales `!gh auth git-credential`. Scopes: `repo`, `workflow`, `read:org`, `read:project` |
 | `KAMAL_REGISTRY_PASSWORD` | kamal | Autenticación del registry |
 | `XANNHAEL_DATABASE_PASSWORD` | producción | Password de la DB en prod |
 | `DATABASE_URL` | CI | URL completa (solo GitHub Actions) |

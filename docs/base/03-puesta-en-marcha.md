@@ -113,4 +113,37 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 > cuando pasas el proyecto por `scaffold:rename` (los volúmenes Docker viejos
 > quedan huérfanos — ver [09](09-renovar-template.md)).
 
+## Git y GitHub desde el contenedor
+
+Dentro del contenedor **no hay claves SSH** (`~/.ssh` solo tiene
+`known_hosts`), así que un remote `git@github.com:...` falla siempre con
+`Permission denied (publickey)`. El push va por **HTTPS** con el token de
+`.env`, delegando en `gh` como helper de credenciales:
+
+```bash
+# 1. el remote debe ser HTTPS
+git remote -v
+git remote set-url origin https://github.com/<org>/<repo>.git
+
+# 2. helper de credenciales SOLO para este repo
+#    (el "" corta la lista heredada; así no tocamos ~/.gitconfig del host,
+#     cuyo helper apunta al gh.exe de Windows y no corre en Linux)
+git config credential.https://github.com.helper ""
+git config credential.https://github.com.helper "!gh auth git-credential"
+
+# 3. comprobar y empujar
+gh auth status          # debe estar logueado con tu GH_TOKEN
+git ls-remote origin    # debe listar las ramas sin pedirte nada
+git push                # sin -f: el push es fast-forward
+```
+
+> ⚠️ Para subir cambios bajo `.github/workflows/` el token necesita el scope
+> **`workflow`** (ver `.env.example`).
+
+**¿Prefieres SSH?** Tendrías que crear la clave dentro del contenedor
+(`ssh-keygen -t ed25519 -C "tu@email"`), añadir la pública en
+GitHub → *Settings → SSH keys*, y volver a apuntar el remote a
+`git@github.com:...`. Como `~/.ssh` **no está en ningún volumen**, la clave
+se pierde al reconstruir el contenedor.
+
 Sigue con [04 · Arquitectura web](04-arquitectura-web.md).
