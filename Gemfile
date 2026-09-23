@@ -22,7 +22,7 @@ gem "jbuilder"
 # JSON parser pinned to 2.x. json 3.x changed `JSON.parse` to keyword-only
 # args, which breaks ActiveSupport::JSON.decode and ActiveRecord::Type::Serialized
 # (the `arguments` column of Solid Queue jobs) on Rails 8.1. Do NOT bump to 3.x.
-gem "json", "~> 2.0"
+gem "json", "~> 3.0"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
