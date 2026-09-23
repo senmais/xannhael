@@ -6,68 +6,148 @@
   "service": "rails-app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
+  // Use the standard non-root development user.
+  "remoteUser": "vscode",
+
+  // Keep the container user's UID/GID aligned where supported.
+  "updateRemoteUserUID": true,
+
   // Features to add to the dev container. More info: https://containers.dev/features.
+  //
+  // Keep OS/tooling dependencies here instead of installing them from
+  // postCreateCommand so Docker can cache the corresponding image layers.
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/rails/devcontainer/features/activestorage": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {"moby":false},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": { "moby": false },
     "ghcr.io/rails/devcontainer/features/postgres-client": {},
-    // Node powers the stimulus-lsp language server
+    // Node powers the stimulus-lsp language server.
     "ghcr.io/devcontainers/features/node:1": {}
   },
 
+  // Environment for the container. intentionally minimal: application and
+  // secret variables live in .env (see .env.example) and are loaded via
+  // compose `env_file`. Do NOT duplicate .env keys here — containerEnv would
+  // silently shadow them. Only devcontainer mechanics stay here.
   "containerEnv": {
-    "CAPYBARA_SERVER_PORT": "45678",
-    "SELENIUM_HOST": "selenium",
-    "KAMAL_REGISTRY_PASSWORD": "$KAMAL_REGISTRY_PASSWORD",
-    // DB_HOST triggers the shared postgres-db connection from config/database.yml
-    "DB_HOST": "host.docker.internal",
-    // API keys from the host so codex/opencode authenticate without logging in
-    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
-    "OPENCODE_API_KEY": "${localEnv:OPENCODE_API_KEY}",
-    // For the psql client
-    "PGHOST": "host.docker.internal",
-    "PGPORT": "55432",
-    "PGUSER": "postgres",
-    "PGPASSWORD": "postgres"
+    // Git must trust the bind-mounted workspace before VS Code itself starts
+    // inspecting the repository. A postCreate git config runs too late for
+    // this initial check, hence runtime configuration via environment.
+    "GIT_CONFIG_COUNT": "1",
+    "GIT_CONFIG_KEY_0": "safe.directory",
+    "GIT_CONFIG_VALUE_0": "/workspaces/xannhael",
+
+    // Keep Git's persistent global configuration under ~/.config
+    // (persisted through the xannhael-user-config volume).
+    "GIT_CONFIG_GLOBAL": "/home/vscode/.config/git/config",
+
+    // Explicit gh configuration path.
+    "GH_CONFIG_DIR": "/home/vscode/.config/gh",
+
+    // Explicit XDG data directory.
+    // gh extensions live under ~/.local/share/gh/extensions.
+    "XDG_DATA_HOME": "/home/vscode/.local/share",
+
+    // Explicit cache directory persisted between rebuilds.
+    "XDG_CACHE_HOME": "/home/vscode/.cache",
+
+    // Bundler installation path, backed by the xannhael-bundle volume.
+    "BUNDLE_PATH": "/usr/local/bundle",
+
+    // Parallel gem installation when dependencies actually change.
+    "BUNDLE_JOBS": "8",
+    "BUNDLE_RETRY": "3"
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [3000],
 
+  // Configure forwarded-port behaviour.
+  "portsAttributes": {
+    "3000": {
+      "label": "xannhael Rails",
+      "onAutoForward": "notify"
+    }
+  },
+
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
-      // The Rails image provides ruby on PATH via mise; stop ruby-lsp from probing asdf/mise on its own
+      // The Rails image provides ruby on PATH via mise; stop ruby-lsp from probing asdf/mise on its own.
       "settings": {
-        "rubyLsp.rubyVersionManager": "none"
+        "rubyLsp.rubyVersionManager": "none",
+
+        // Copilot inline completions require both the extension (listed
+        // below) and inline suggestions enabled on the remote side.
+        "editor.inlineSuggest.enabled": true,
+        "github.copilot.enable": {
+          "*": true
+        },
+
+        // Reduce unnecessary filesystem watching.
+        "files.watcherExclude": {
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/tmp/**": true,
+          "**/log/**": true,
+          "**/storage/**": true,
+          "**/node_modules/**": true
+        },
+
+        // Avoid searching generated/runtime data.
+        "search.exclude": {
+          "**/tmp/**": true,
+          "**/log/**": true,
+          "**/storage/**": true,
+          "**/node_modules/**": true
+        }
       },
       "extensions": [
-        // Ruby on Rails
+        // Ruby on Rails (web + Hotwire Native targets share the same codebase).
         "Shopify.ruby-lsp",
         "koichisasada.vscode-rdbg",
         "jemmyw.rails-fast-nav",
         "aliariff.vscode-erb-beautify",
-        // Hotwire / Stimulus / Tailwind
+        // ERB language server: hover/completion/format in *.html.erb views.
+        "marcoroth.herb-lsp",
+        // Hotwire / Stimulus / Tailwind.
         "marcoroth.stimulus-lsp",
         "bradlc.vscode-tailwindcss",
-        // Git
+        // GitHub Copilot: inline suggestions + chat. They must be listed
+        // here so they survive every devcontainer rebuild.
+        "github.copilot",
+        "github.copilot-chat",
+        // Git + GitHub: history, PRs/Issues, workflows.
         "mhutchie.git-graph",
+        "eamodio.gitlens",
         "github.vscode-pull-request-github",
-        // CI
-        "github.vscode-github-actions"
+        // CI.
+        "github.vscode-github-actions",
+        // OpenAI Codex IDE extension (pairs with the Codex CLI installed
+        // in the image and the persisted ~/.codex volume below).
+        "openai.chatgpt"
       ]
     }
   },
 
-  // Uncomment to connect as root instead. More info: https://containers.dev/implementors/json_reference/#remoteUser.
-  // "remoteUser": "root",
-
-  // Ensure the shared postgres-db container is running before setting up the app
-  "onCreateCommand": "docker start postgres-db >/dev/null 2>&1 || true",
-
   // Use 'postCreateCommand' to run commands after the container is created.
-  // The workspace is bind-mounted with root ownership, so whitelist it for git
-  // (otherwise the VS Code Git extension reports "dubious ownership" and shows nothing).
-  "postCreateCommand": "git config --global --add safe.directory /workspaces/xannhael && bin/setup --skip-server"
+  //
+  // Docker named volumes are created as root. Before Bundler, Git, gh or the
+  // OpenCode background service use them, ensure the vscode user owns the
+  // persistent mount points (a root-owned ~/.local/state/opencode, for
+  // example, makes the v2 server fail with "Server process exited with
+  // code 1" because it cannot write service.json).
+  //
+  // Environment comes from .env (see .env.example, loaded via compose
+  // `env_file`); the first step warns loudly when it is missing so nobody
+  // has to guess why the database connection fails on a fresh clone.
+  //
+  // Then bin/setup installs gems (only when Gemfile.lock requires something
+  // missing) and prepares/migrates the databases. The opencode check is
+  // non-fatal so a CLI hiccup never blocks Rails setup.
+  "postCreateCommand": "test -f .env || echo 'WARNING: .env not found — copy it with: cp .env.example .env (see .env.example header)' && sudo chown -R vscode:vscode /usr/local/bundle /home/vscode/.config /home/vscode/.local/share /home/vscode/.local/state /home/vscode/.cache && mkdir -p storage && (opencode --version || echo 'WARNING: opencode CLI not ready') && bin/setup --skip-server",
+
+  // Ensure the shared postgres-db container is running every time the
+  // development container starts.
+  "postStartCommand": "docker start postgres-db >/dev/null 2>&1 || true"
 }

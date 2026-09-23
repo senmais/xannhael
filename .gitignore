@@ -7,8 +7,11 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
-/.env*
+# Ignore environment files, but keep the documented example versioned.
+# (.env holds local secrets; .env.example is the template everyone copies.)
+/.env
+/.env.*
+!/.env.example
 
 # Ignore all logfiles and tempfiles.
 /log/*

@@ -34,8 +34,12 @@ docker run -d --name postgres-db -p 55432:5432 -e POSTGRES_PASSWORD=postgres pos
 # 1. Arranca la base de datos compartida
 docker start postgres-db
 
-# 2. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
-# 3. Dentro del contenedor:
+# 2. Variables de entorno (solo la primera vez; .env está gitignored)
+cp .env.example .env
+# Rellena las claves vacías: OPENAI_API_KEY, OPENCODE_API_KEY, GITHUB_TOKEN...
+
+# 3. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
+# 4. Dentro del contenedor:
 bin/dev
 ```
 
@@ -86,6 +90,8 @@ Detalles en [09 · Reutilizar como template](docs/base/09-renovar-template.md).
 
 - Docker + VS Code Dev Containers
 - Un contenedor Postgres compartido `postgres-db` (puerto `55432 -> 5432`)
+- Un `.env` local con tus claves: `cp .env.example .env` (gitignored; ver
+  [02 · Configuración](docs/base/02-configuracion.md))
 
 ---
 

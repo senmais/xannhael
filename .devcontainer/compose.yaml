@@ -6,35 +6,85 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
 
-    # Reach the shared postgres-db container running on the host
+    # Single source of truth for environment: .env at the repository root
+    # (gitignored), documented in .env.example. `required: false` so the
+    # container still builds on a fresh clone before `cp .env.example .env`
+    # (postCreateCommand warns loudly in that case).
+    env_file:
+      - path: ../.env
+        required: false
+
+    # Reach the shared postgres-db container running on the host.
+    # Default database topology: a single postgres-db container shared across
+    # projects (see config/database.yml, which reads credentials when DB_HOST
+    # is set). No local database service is started unless you uncomment
+    # `db` below.
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
 
     volumes:
-    - ../../xannhael:/workspaces/xannhael:cached
-    # Persistent state + credentials for CLI tools (survive container rebuilds)
-    - codex-home:/home/vscode/.codex
-    - opencode-config:/home/vscode/.config/opencode
-    - opencode-data:/home/vscode/.local/share/opencode
+      # Project sources.
+      - ..:/workspaces/xannhael:cached
 
-    # Overrides default command so things don't shut down after the process ends.
+      # Installed gems. Populated by `bundle install` on the first build and
+      # reused via `bundle check` on following rebuilds.
+      - xannhael-bundle:/usr/local/bundle
+
+      # ~/.config: git config, gh auth state, opencode.json / cli.json.
+      - xannhael-user-config:/home/vscode/.config
+
+      # ~/.local/share: opencode sessions (opencode.db), auth.json, logs;
+      # gh extensions (avoids re-downloading them after every rebuild).
+      - xannhael-user-data:/home/vscode/.local/share
+
+      # ~/.cache: disposable tool caches. Safe to delete if a cached tool
+      # state ever becomes corrupted.
+      - xannhael-user-cache:/home/vscode/.cache
+
+      # Codex CLI state (auth.json, sessions).
+      - xannhael-codex:/home/vscode/.codex
+
+    # Keep the container alive; VS Code attaches and runs lifecycle commands.
     command: sleep infinity
 
-    # Uncomment the next line to use a non-root user for all processes.
-    # user: vscode
+  # ---------------------------------------------------------------------------
+  # Optional local services. Both are disabled by default.
+  # ---------------------------------------------------------------------------
+  # To use a project-local database instead of the shared postgres-db:
+  #   1. Uncomment the `db` service and the `postgres-data` volume.
+  #   2. Set DB_HOST=db in .env and align Rails credentials
+  #      (config/database.yml reads host/port/user/password from credentials
+  #      when DB_HOST is set; defaults target the shared container).
+  #   3. Recreate the container and run `bin/rails db:prepare`.
+  #
+  # db:
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
 
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-    # Selenium only needed for system tests; start it on demand with:
-    #   docker compose -f .devcontainer/compose.yaml up -d selenium
-    # depends_on:
-    # - selenium
-
+  # Selenium is only needed for system tests. Start it on demand with:
+  #   docker compose -f .devcontainer/compose.yaml up -d selenium
+  # The app resolves it via SELENIUM_HOST (see .env.example).
+  #
   # selenium:
-  #   image: selenium/standalone-chromium
+  #   image: selenium/standalone-chromium:latest
   #   restart: unless-stopped
 
 volumes:
-  codex-home:
-  opencode-config:
-  opencode-data:
+  xannhael-bundle:
+  xannhael-user-config:
+  xannhael-user-data:
+  xannhael-user-cache:
+  xannhael-codex:
+  # postgres-data:
