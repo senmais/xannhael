@@ -5,6 +5,10 @@ CI.run do
 
   step "Style: Ruby", "bin/rubocop"
 
+  # Optional: valida la config del editor y hace un handshake LSP real
+  # (~26 s). Útil si tocas el devcontainer o la config de la extensión.
+  # step "Editor: Ruby LSP", "bin/rails lsp:check"
+
   step "Security: Gem audit", "bin/bundler-audit"
   step "Security: Importmap vulnerability audit", "bin/importmap audit"
   step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"

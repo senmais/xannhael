@@ -15,7 +15,7 @@ lo necesites, sin sentirte abrumado. Si eres nuevo, empieza por
 | 05 | [La suite Solid](05-solid-suite.md) | Solid Queue, Cache y Cable + Mission Control |
 | 06 | [App móvil Android](06-app-movil.md) | Cliente Hotwire Native que habla con la web |
 | 07 | [Despliegue a producción](07-despliegue.md) | Docker, Kamal y Thruster |
-| 08 | [Pruebas y CI](08-pruebas-y-ci.md) | Tests, RuboCop, Brakeman y GitHub Actions |
+| 08 | [Pruebas y CI](08-pruebas-y-ci.md) | Tests, RuboCop, Brakeman, GitHub Actions y el check del Ruby LSP |
 | 09 | [Reutilizar como template](09-renovar-template.md) | Renombrar el repo para un proyecto nuevo |
 
 ## Rutas rápidas

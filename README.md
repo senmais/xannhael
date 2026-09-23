@@ -72,7 +72,12 @@ tema. Ábrelo cuando lo necesites, sin agobios:
 ```bash
 bin/rails db:test:prepare
 bin/rails test
+bin/rails lsp:check   # valida que el editor tiene Ruby LSP en marcha
 ```
+
+`lsp:check` comprueba la configuración del LSP **y** hace un handshake real
+con el servidor (sugerencias, navegación, símbolos). Ver
+[08 · Pruebas y CI](docs/base/08-pruebas-y-ci.md#validar-el-ruby-lsp).
 
 ## Crear un proyecto nuevo desde este template
 

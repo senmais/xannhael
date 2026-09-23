@@ -74,8 +74,11 @@
   "customizations": {
     "vscode": {
       // The Rails image provides ruby on PATH via mise; stop ruby-lsp from probing asdf/mise on its own.
+      // NOTE: since shopify.ruby-lsp 0.10.x this setting is an OBJECT, not a string.
+      // The legacy string form ("none") crashes activation with:
+      //   TypeError: Cannot create property 'identifier' on string 'none'
       "settings": {
-        "rubyLsp.rubyVersionManager": "none",
+        "rubyLsp.rubyVersionManager": { "identifier": "none" },
 
         // Copilot inline completions require both the extension (listed
         // below) and inline suggestions enabled on the remote side.
