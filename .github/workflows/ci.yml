@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -28,8 +28,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install system libraries (libvips for ruby-vips)
+        # bin/importmap boots the Rails app via config/application.rb, which
+        # Bundler.requires ruby-vips. That gem is FFI and needs libvips.so.42
+        # at runtime, otherwise it fails with "Could not open library 'vips'".
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -45,7 +51,7 @@ jobs:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -89,7 +95,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -128,7 +134,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
