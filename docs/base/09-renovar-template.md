@@ -72,25 +72,12 @@ flowchart TB
 
 ## Devcontainer y volúmenes tras el rename
 
-La tarea reescribe `.devcontainer/compose.yaml` (volúmenes `xannhael-*`,
-ruta `/workspaces/xannhael`) y `.env.example`. Ojo con dos cosas:
-
-1. **Los volúmenes Docker no se renombran**: los creados con el nombre viejo
-   quedan huérfanos.
-
-   ```bash
-   # conservar el contenido (gems ya instaladas, auth de opencode…):
-   docker volume create blog-bundle && docker volume rm xannhael-bundle
-   # …o empezar de cero:
-   docker volume rm xannhael-bundle xannhael-user-config xannhael-user-data \
-     xannhael-user-cache xannhael-codex
-   ```
-
-2. **El `SLUG` debe coincidir con el nombre de la carpeta del clone**: la ruta
-   de montaje del compose (`/workspaces/<slug>`) tiene que igualar el
-   `workspaceFolder: "/workspaces/${localWorkspaceFolderBasename}"` de
-   `devcontainer.json`. Si renombras con un `SLUG` distinto del nombre de la
-   carpeta, edita esa ruta a mano.
+La configuración del contenedor es agnóstica al nombre del proyecto: monta la
+raíz del repositorio en `/workspaces/project`, así que el `SLUG` y el nombre de
+la carpeta pueden cambiar sin editar rutas. Compose crea los volúmenes con un
+prefijo según el proyecto; al renombrar, los volúmenes anteriores quedan
+huérfanos. Si quieres conservar las gems, transfiere el volumen `bundle`; los
+datos de OpenCode están en `agent-data`.
 
 Tras renombrar, **reconstruye el contenedor** para que aplique todo.
 

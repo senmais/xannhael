@@ -29,16 +29,23 @@ gitignored, así que cada persona lo tiene):
 
 ```bash
 cp .env.example .env
-# rellena las claves vacías: OPENAI_API_KEY, OPENCODE_API_KEY, GITHUB_TOKEN…
+# rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# OpenCode Go/Zen se autentica dentro de OpenCode con /connect.
 ```
 
 **3. Abre el repo en VS Code** y ejecuta **Dev Containers: Rebuild and Reopen
 in Container**. La primera compilación baja la imagen de Rails, Ruby, Node y
 herramientas — tarda unos minutos.
 
-Al crearse ejecuta el `postCreateCommand`: avisa si falta `.env`, ajusta el
-propietario de los volúmenes (`chown`), crea `storage/`, comprueba `opencode
---version` y lanza `bin/setup --skip-server`.
+Al crearse ejecuta el `postCreateCommand`: valida las credenciales de `codex`
+y `gh`, ajusta permisos, prepara pnpm y la autenticación GitHub, instala las
+gems que falten y ejecuta `bin/rails db:prepare`.
+
+**OpenCode Go/Zen (primera vez):** abre `opencode` en la terminal, ejecuta
+`/connect`, selecciona **OpenCode Go** o **OpenCode Zen** e introduce la API
+key de tu plan. Después ejecuta `/models` y elige el modelo. La sesión y las
+credenciales se guardan en volúmenes persistentes, por lo que sobreviven a los
+rebuilds del devcontainer. No se requiere poner estas claves en `.env`.
 
 **4. Arranca la app** desde la terminal integrada:
 
@@ -89,9 +96,8 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 
 ## Herramientas incluidas en el contenedor
 
-- **codex** (binario autónomo) y **OpenCode v2**: la versión va fijada con el
-  build arg `OPENCODE_VERSION` en `.devcontainer/Dockerfile`. Para subirla,
-  cambia el arg y haz **Rebuild** del contenedor.
+- **codex** (binario autónomo) y **OpenCode v2**: se instala con el instalador
+  oficial V2 al reconstruir el contenedor.
 - **overmind** + **tmux** (ejecutan el Procfile)
 - **Bundler** fijado a la versión del lockfile
 - Usuario no root **`vscode`** con UID/GID sincronizados con tu host
@@ -103,15 +109,14 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 
 | Volumen | Qué guarda |
 |---------|------------|
-| `xannhael-bundle` | las gems instaladas (`/usr/local/bundle`) |
-| `xannhael-user-config` | git/gh config y `opencode.json` |
-| `xannhael-user-data` | sesiones de OpenCode (`opencode.db`), auth, extensiones de `gh` |
-| `xannhael-user-cache` | cachés desechables (borrar si algo se corrompe) |
-| `xannhael-codex` | auth y sesiones de codex |
+| `bundle` | Gems instaladas (`/usr/local/bundle`) |
+| `agent-data` | Datos OpenCode (config, sesiones, credenciales, estado y caché) y extensiones de `gh` |
 
-> Todos se definen en `.devcontainer/compose.yaml` y **se renombran solos**
-> cuando pasas el proyecto por `scaffold:rename` (los volúmenes Docker viejos
-> quedan huérfanos — ver [09](09-renovar-template.md)).
+> Solo hay dos volúmenes nombrados. El código se monta desde la raíz del repo
+> (`..`) en `/workspaces/project`; esa ruta interna es fija para que el
+> devcontainer siga funcionando después de renombrar el proyecto.
+> `XDG_CONFIG_HOME`, `XDG_STATE_HOME` y `XDG_CACHE_HOME` apuntan dentro de
+> `agent-data` para conservar toda la configuración local de OpenCode.
 
 ## Git y GitHub desde el contenedor
 
@@ -132,7 +137,7 @@ git config credential.https://github.com.helper ""
 git config credential.https://github.com.helper "!gh auth git-credential"
 
 # 3. comprobar y empujar
-gh auth status          # debe estar logueado con tu GH_TOKEN
+gh auth status          # usa el token de .env; no necesitas `gh auth login`
 git ls-remote origin    # debe listar las ramas sin pedirte nada
 git push                # sin -f: el push es fast-forward
 ```

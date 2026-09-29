@@ -36,7 +36,8 @@ docker start postgres-db
 
 # 2. Variables de entorno (solo la primera vez; .env está gitignored)
 cp .env.example .env
-# Rellena las claves vacías: OPENAI_API_KEY, OPENCODE_API_KEY, GITHUB_TOKEN...
+# Rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# OpenCode Go/Zen se conecta desde su TUI con /connect y guarda auth persistente.
 
 # 3. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
 # 4. Dentro del contenedor:

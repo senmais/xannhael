@@ -62,14 +62,16 @@ cp .env.example .env   # solo la primera vez, o en cada clone nuevo
 
 Lo carga Docker Compose en el devcontainer mediante `env_file: ../.env` (ver
 `.devcontainer/compose.yaml`). Por eso el `containerEnv` de `devcontainer.json`
-está **vacío a propósito**:
+no contiene credenciales a propósito:
 
 > 🔒 No repitas estas claves en `containerEnv`: haría *shadowing* y
 > sobrescribiría en silencio lo que pongas en `.env`.
 
-`env_file` usa `required: false`, así que el contenedor arranca aunque falte
-`.env`, pero el `postCreateCommand` te avisa con
-`WARNING: .env not found — copy it with: cp .env.example .env`.
+`env_file` usa `required: false`, así que el contenedor puede arrancar aunque
+`.env` falte. Aun así, el `postCreateCommand` ejecuta
+`.devcontainer/check-tools-env.sh` antes de preparar la aplicación: si falta el
+fichero o alguna credencial obligatoria, muestra el error explícito y termina
+con código 1. No se reenvían estas variables desde el host.
 
 ### Ya vienen rellenados (defaults de desarrollo)
 
@@ -85,7 +87,6 @@ está **vacío a propósito**:
 | Variable | Usada por | Propósito |
 |----------|-----------|-----------|
 | `OPENAI_API_KEY` | codex | Autenticación OpenAI |
-| `OPENCODE_API_KEY` | opencode | Proveedores Zen y Go |
 | `GITHUB_TOKEN` / `GH_TOKEN` | `gh` + `git push` (HTTPS) | Autenticación de GitHub: la usa `gh` y el helper de credenciales `!gh auth git-credential`. Scopes: `repo`, `workflow`, `read:org`, `read:project` |
 | `KAMAL_REGISTRY_PASSWORD` | kamal | Autenticación del registry |
 | `XANNHAEL_DATABASE_PASSWORD` | producción | Password de la DB en prod |
@@ -103,8 +104,13 @@ está **vacío a propósito**:
 | `SOLID_QUEUE_IN_PUMA` | `1` | Corre Solid Queue dentro de Puma (deploy único) |
 | `JOB_CONCURRENCY` | `1` | Procesos worker de Solid Queue |
 
-> Las claves de las herramientas van **en `.env`**, no en el shell del host: el
-> devcontainer ya no reenvía `${localEnv:...}`.
+> Las credenciales de Codex y GitHub se definen en el `.env` del proyecto.
+> OpenCode Go/Zen se conecta con `/connect` y guarda su autenticación en su
+> volumen persistente; no requiere una variable específica en `.env`.
+> Compose carga las variables mediante `env_file` y no se
+> reenvían con `localEnv`: una variable ausente del host se expandiría a una
+> cadena vacía y pisaría el valor de `.env`. El `postCreateCommand` falla con
+> un mensaje explícito si falta alguna credencial obligatoria.
 
 ## 4. `config/database.yml`
 

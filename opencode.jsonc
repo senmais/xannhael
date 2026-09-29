@@ -1,0 +1,52 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "manual",
+  "instructions": ["AGENTS.md"],
+  "compaction": {
+    "auto": true,
+    "keep": { "tokens": 12000 },
+    "buffer": 24000
+  },
+  "permissions": [
+    { "action": "read", "resource": ".env", "effect": "deny" },
+    { "action": "read", "resource": ".env.*", "effect": "deny" },
+    { "action": "edit", "resource": ".env", "effect": "deny" },
+    { "action": "edit", "resource": ".env.*", "effect": "deny" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git push *", "effect": "ask" }
+  ],
+  "agents": {
+    "reviewer": {
+      "description": "Revisa cambios Rails y Hotwire sin editar archivos.",
+      "mode": "subagent",
+      "system": "Revisa el diff buscando errores funcionales, regresiones, problemas de seguridad y falta de cobertura. Prioriza hallazgos concretos con archivo y línea. No modifiques archivos.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "git status *", "effect": "allow" },
+        { "action": "shell", "resource": "git diff *", "effect": "allow" }
+      ]
+    },
+    "rails_helper": {
+      "description": "Ayuda especializada en Rails, Hotwire y convenciones del proyecto.",
+      "mode": "subagent",
+      "system": "Trabaja dentro de las convenciones Rails del repositorio. Antes de proponer cambios, inspecciona código y documentación relacionados. Prefiere soluciones pequeñas, seguras y compatibles con Hotwire. No ejecutes migraciones ni comandos destructivos sin aprobación explícita."
+    }
+  },
+  "commands": {
+    "review": {
+      "description": "Revisa el diff actual para detectar problemas concretos.",
+      "template": "Revisa los cambios actuales frente a la rama base. Busca bugs, regresiones, problemas de seguridad y carencias de pruebas. Devuelve solo hallazgos accionables, ordenados por severidad, con referencias archivo:línea. Diff:\n!`git diff --`",
+      "agent": "reviewer",
+      "subagent": true
+    },
+    "verify": {
+      "description": "Ejecuta las comprobaciones adecuadas para los cambios actuales.",
+      "template": "Inspecciona el diff y los archivos afectados. Identifica las comprobaciones Rails/Ruby/JavaScript adecuadas, ejecútalas y resume resultados y fallos. No cambies archivos.",
+      "subagent": true
+    }
+  }
+}

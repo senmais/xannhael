@@ -57,9 +57,11 @@ require "shellwords"
 #   * The shared postgres-db container running:  docker start postgres-db
 #   * Env vars the devcontainer sets itself (no action needed): DB_HOST,
 #     PGHOST/PGPORT/PGUSER/PGPASSWORD, SELENIUM_HOST, CAPYBARA_SERVER_PORT.
-#   * Optional, not needed to run the app: OPENAI_API_KEY, OPENCODE_API_KEY
-#     (codex/opencode auth), KAMAL_REGISTRY_PASSWORD (deploy),
-#     XANNHAEL_DATABASE_PASSWORD (production DB only).
+#   * Required for the devcontainer lifecycle (not by Rails itself):
+#     OPENAI_API_KEY (codex) and one of GITHUB_TOKEN/GH_TOKEN (gh CLI).
+#     OpenCode Go/Zen auth is configured once with /connect and persisted in
+#     the agent-data volume. KAMAL_REGISTRY_PASSWORD (deploy) and
+#     XANNHAEL_DATABASE_PASSWORD (production DB only) remain optional.
 #
 # WHAT IT SKIPS (never touched):
 #   * .git                    (history kept; the 'origin' remote IS removed)
