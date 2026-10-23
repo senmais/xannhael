@@ -28,13 +28,14 @@ Android y documentación de inicio.
   Cable usan tres archivos SQLite en `storage/`; no se debe compartir ese
   directorio.
 - El Dockerfile del Dev Container instala utilidades, Codex y OpenCode durante
-  el build. `devcontainer.json` añade GitHub CLI, cliente PostgreSQL, Node y
+  el build. `devcontainer.json` añade GitHub CLI, cliente PostgreSQL y
   Docker-outside-of-Docker. Bundler instala gems en un volumen persistente y
   `postCreateCommand` usa `bundle check` antes de instalar.
-- `postCreateCommand` exige que `.env` contenga una clave OpenAI y un token de
-  GitHub aunque Rails y las tareas web no necesitan esos servicios para
-  arrancar. También recorre recursivamente los volúmenes de gems y agentes con
-  `chown`. `setup-gh.sh` puede descargar extensiones de GitHub en esa fase.
+- `postCreateCommand` exigía una clave OpenAI y un token de GitHub, y preparaba
+  automáticamente la base con `db:prepare`. Esto mezclaba credenciales de
+  herramientas opcionales con la creación del contenedor y podía migrar la base
+  compartida sin una confirmación explícita. También recorre recursivamente
+  los volúmenes de gems y agentes con `chown`.
 - Node y pnpm se especifican como `lts` y `latest`; las Features usan tags de
   versión mayor. Overmind y Codex/OpenCode tienen mecanismos de instalación
   distintos, con versiones no todas fijadas en la configuración del template.
@@ -46,6 +47,13 @@ Android y documentación de inicio.
   `.env.example` y excluye secretos, SQLite y artefactos locales.
 - Git usa HTTPS con GitHub CLI según la documentación actual. No se monta
   `~/.ssh` ni se copian claves privadas en la imagen.
+- `CODEX_HOME` por defecto es `~/.codex`, fuera del volumen `agent-data`;
+  reconstruir el contenedor podía perder la configuración y las sesiones de
+  Codex.
+- El repositorio no contiene `package.json` ni lockfile de npm, pnpm o Yarn;
+  usa Importmap y Tailwind CSS desde Gems. Node y pnpm se retiraron del
+  contenedor base. Una aplicación derivada con dependencias JavaScript puede
+  habilitar la Feature Node en su configuración.
 
 ### Riesgos y decisiones de arquitectura
 
@@ -64,6 +72,10 @@ Android y documentación de inicio.
 5. Android sigue siendo opcional y externo al contenedor web. Su caché de
    descargas puede persistir en el perfil del desarrollador, mientras que
    builds e intermediarios permanecen propios de cada aplicación.
+6. El hook `postCreateCommand` solo instala gems y prepara directorios. Las
+   credenciales externas son opcionales, `setup-gh.sh` se ejecuta bajo demanda
+   y las bases se preparan manualmente después de revisar el destino.
+   `CODEX_HOME` apunta al volumen aislado del proyecto.
 
 ### Línea base disponible
 

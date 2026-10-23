@@ -36,11 +36,14 @@ docker start postgres-db
 
 # 2. Variables de entorno (solo la primera vez; .env está gitignored)
 cp .env.example .env
-# Rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# Añade claves opcionales si usarás Codex o GitHub CLI.
 # OpenCode Go/Zen se conecta desde su TUI con /connect y guarda auth persistente.
 
 # 3. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
-# 4. Dentro del contenedor:
+# 4. Dentro del contenedor, prepara explícitamente la base configurada:
+bin/rails db:prepare
+
+# 5. Arranca Rails:
 bin/dev
 ```
 
@@ -96,7 +99,8 @@ Detalles en [09 · Reutilizar como template](docs/base/09-renovar-template.md).
 
 - Docker + VS Code Dev Containers
 - Un contenedor Postgres compartido `postgres-db` (puerto `55432 -> 5432`)
-- Un `.env` local con tus claves: `cp .env.example .env` (gitignored; ver
+- `.env` es opcional para credenciales de herramientas externas; copia
+  `.env.example` si las necesitas (ver
   [02 · Configuración](docs/base/02-configuracion.md))
 
 ---

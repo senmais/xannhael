@@ -23,7 +23,7 @@ RUN curl -fsSL https://github.com/DarthSim/overmind/releases/download/v2.5.1/ove
     chmod +x /usr/local/bin/overmind && \
     test -x /usr/local/bin/overmind
 
-# Codex CLI (standalone binary, no Node). CODEX_HOME pins the package under the persistent volume.
+# Codex CLI (standalone binary, no Node). Runtime state lives in the project-scoped agent-data volume.
 RUN curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_HOME=/home/vscode/.codex CODEX_INSTALL_DIR=/usr/local/bin sh && \
     test -x /usr/local/bin/codex
 
@@ -33,14 +33,18 @@ RUN export HOME=/home/vscode && \
     ln -sf /home/vscode/.opencode/bin/opencode /usr/local/bin/opencode && \
     test -x /usr/local/bin/opencode && /usr/local/bin/opencode --version
 
+ENV CODEX_HOME="/home/vscode/.local/share/codex"
+
 # Pre-create persistent state dirs owned by vscode so the named volumes stay writable.
 # NOTE: OpenCode uses ~/.local/state/opencode/service.json (XDG state),
 # not just config/share, so the state dir must exist and be owned by vscode.
 RUN mkdir -p /home/vscode/.codex \
+               /home/vscode/.local/share/codex \
                /home/vscode/.config/opencode \
                /home/vscode/.local/share/opencode \
                /home/vscode/.local/state/opencode && \
       chown -R vscode:vscode /home/vscode/.codex \
+                             /home/vscode/.local/share/codex \
                              /home/vscode/.config/opencode \
                              /home/vscode/.local/share/opencode \
                              /home/vscode/.local/state/opencode

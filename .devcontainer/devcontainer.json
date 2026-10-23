@@ -21,11 +21,7 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false
     },
-    "ghcr.io/rails/devcontainer/features/postgres-client": {},
-    "ghcr.io/devcontainers/features/node:2": {
-      "version": "lts",
-      "pnpmVersion": "latest"
-    }
+    "ghcr.io/rails/devcontainer/features/postgres-client": {}
   },
 
   "containerEnv": {
@@ -37,9 +33,6 @@
     // llegan via compose env_file desde el .env del proyecto.
     // No re-anadirlas aqui con ${localEnv:...}: una var de host ausente
     // expande a string vacio y pisa el valor de .env.
-
-    // Corepack runs non-interactively (no download prompt).
-    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0",
 
     // DB_HOST triggers the shared postgres-db connection from config/database.yml.
     "DB_HOST": "host.docker.internal",
@@ -139,13 +132,7 @@
     }
   },
 
-  // Docker named volumes are created as root; make the shared agent-data
-  // volume writable before OpenCode or GitHub CLI starts.
-  // check-tools-env.sh va PRIMERO: .env es la unica fuente de credenciales
-  // (compose lo carga via env_file) y falla con mensaje explicito si falta alguna.
-  "postCreateCommand": "bash .devcontainer/check-tools-env.sh && sudo chown -R vscode:vscode /usr/local/bundle /home/vscode/.local/share && mkdir -p storage /home/vscode/.config/git /home/vscode/.config/gh /home/vscode/.local/share/gh/extensions /home/vscode/.local/share/.config/opencode /home/vscode/.local/share/.state/opencode /home/vscode/.local/share/.cache/opencode && corepack enable && pnpm --version && bash .devcontainer/setup-gh.sh && (bundle check || bundle install) && bin/rails db:prepare",
-
-  // Ensure the shared postgres-db container is running every time the
-  // development container starts.
-  "postStartCommand": "docker start postgres-db >/dev/null 2>&1 || true"
+  // Keep optional credentials and database changes out of container creation.
+  // Prepare a selected database manually after reviewing its target.
+  "postCreateCommand": "sudo chown -R vscode:vscode /usr/local/bundle /home/vscode/.local/share && mkdir -p storage /home/vscode/.config/git /home/vscode/.config/gh /home/vscode/.local/share/gh/extensions /home/vscode/.local/share/.config/opencode /home/vscode/.local/share/.state/opencode /home/vscode/.local/share/.cache/opencode /home/vscode/.local/share/codex && (bundle check || bundle install)"
 }

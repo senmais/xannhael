@@ -1,7 +1,7 @@
 # 03 · Puesta en marcha
 
 La forma recomendada de trabajar es con **Docker + Dev Containers de VS Code**,
-porque el contenedor trae Ruby, Postgres, Tailwind, las CLIs (codex/opencode) y
+porque el contenedor trae Ruby, el cliente de Postgres, Tailwind, las CLIs (codex/opencode) y
 las extensiones ya configuradas.
 
 ```mermaid
@@ -29,17 +29,20 @@ gitignored, así que cada persona lo tiene):
 
 ```bash
 cp .env.example .env
-# rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# añade claves opcionales si usarás Codex o GitHub CLI.
 # OpenCode Go/Zen se autentica dentro de OpenCode con /connect.
 ```
 
 **3. Abre el repo en VS Code** y ejecuta **Dev Containers: Rebuild and Reopen
-in Container**. La primera compilación baja la imagen de Rails, Ruby, Node y
-herramientas — tarda unos minutos.
+in Container**. La primera compilación baja la imagen de Ruby y las herramientas
+del contenedor — tarda unos minutos. Este template usa Importmap y Tailwind CSS
+para Rails, así que no instala Node ni un gestor de paquetes JavaScript. Si una
+aplicación derivada añade un `package.json`, puede habilitar la Feature Node en
+su `devcontainer.json`.
 
-Al crearse ejecuta el `postCreateCommand`: valida las credenciales de `codex`
-y `gh`, ajusta permisos, prepara pnpm y la autenticación GitHub, instala las
-gems que falten y ejecuta `bin/rails db:prepare`.
+Al crearse ejecuta el `postCreateCommand`: ajusta permisos e instala las gems
+que falten. No exige credenciales de servicios externos ni prepara o migra una
+base de datos automáticamente.
 
 **OpenCode Go/Zen (primera vez):** abre `opencode` en la terminal, ejecuta
 `/connect`, selecciona **OpenCode Go** o **OpenCode Zen** e introduce la API
@@ -50,8 +53,13 @@ rebuilds del devcontainer. No se requiere poner estas claves en `.env`.
 **4. Arranca la app** desde la terminal integrada:
 
 ```bash
+bin/rails db:prepare  # después de confirmar el host y la base de destino
 bin/dev
 ```
+
+`db:prepare` puede crear o migrar la base de datos configurada. Ejecútalo
+explícitamente después de revisar `DB_HOST` y los datos de conexión en
+`config/credentials.yml.enc` o en las variables de entorno.
 
 Esto lanza (vía **overmind**, que corre el `Procfile.dev` en una sesión tmux):
 
@@ -84,7 +92,8 @@ el servicio `db` y su volumen `postgres-data` comentados:
 2. poner `DB_HOST=db` en `.env` y alinear las credenciales
    (`config/database.yml` lee host/puerto/usuario/password de las credenciales
    cuando `DB_HOST` está definido),
-3. recrear el contenedor y `bin/rails db:prepare`.
+3. recrear el contenedor y ejecutar `bin/rails db:prepare` manualmente después
+   de revisar el host y la base destino.
 
 ## Selenium (solo para tests de sistema)
 
@@ -111,6 +120,13 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 |---------|------------|
 | `bundle` | Gems instaladas (`/usr/local/bundle`) |
 | `agent-data` | Datos OpenCode (config, sesiones, credenciales, estado y caché) y extensiones de `gh` |
+
+El estado de Codex (`CODEX_HOME`) también queda dentro de `agent-data`, aislado
+por proyecto. El volumen `bundle` contiene gems instaladas y sigue siendo
+local a cada proyecto.
+
+La configuración GitHub y las extensiones de `gh` son opcionales. Cuando las
+necesites, ejecuta `bash .devcontainer/setup-gh.sh` dentro del contenedor.
 
 > Solo hay dos volúmenes nombrados. El código se monta desde la raíz del repo
 > (`..`) en `/workspaces/project`; esa ruta interna es fija para que el

@@ -44,8 +44,8 @@ La app usa un contenedor compartido llamado `postgres-db`:
 docker start postgres-db
 ```
 
-El `postStartCommand` del devcontainer lo arranca automáticamente cada vez que
-abres el proyecto.
+Inicia el contenedor de PostgreSQL manualmente cuando lo necesites. El
+Dev Container no arranca ni modifica servicios externos por sí solo.
 
 ## 3. Variables de entorno
 
@@ -68,10 +68,10 @@ no contiene credenciales a propósito:
 > sobrescribiría en silencio lo que pongas en `.env`.
 
 `env_file` usa `required: false`, así que el contenedor puede arrancar aunque
-`.env` falte. Aun así, el `postCreateCommand` ejecuta
-`.devcontainer/check-tools-env.sh` antes de preparar la aplicación: si falta el
-fichero o alguna credencial obligatoria, muestra el error explícito y termina
-con código 1. No se reenvían estas variables desde el host.
+`.env` falte. Las claves de Codex, GitHub y Kamal son opcionales; solo se
+necesitan al utilizar esos servicios. Puedes ejecutar
+`.devcontainer/check-tools-env.sh` manualmente para comprobarlas. No se
+reenvían estas variables desde el host.
 
 ### Ya vienen rellenados (defaults de desarrollo)
 
@@ -109,8 +109,7 @@ con código 1. No se reenvían estas variables desde el host.
 > volumen persistente; no requiere una variable específica en `.env`.
 > Compose carga las variables mediante `env_file` y no se
 > reenvían con `localEnv`: una variable ausente del host se expandiría a una
-> cadena vacía y pisaría el valor de `.env`. El `postCreateCommand` falla con
-> un mensaje explícito si falta alguna credencial obligatoria.
+> cadena vacía y pisaría el valor de `.env`.
 
 ## 4. `config/database.yml`
 
@@ -140,7 +139,7 @@ flowchart LR
 Prepara todo con:
 
 ```bash
-bin/rails db:prepare
+bin/rails db:prepare  # revisa DB_HOST y el destino configurado antes de ejecutar
 ```
 
 Continúa con [03 · Puesta en marcha](03-puesta-en-marcha.md).
