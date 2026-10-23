@@ -23,24 +23,26 @@ flowchart LR
 
 Necesitas Docker + la extensión **Dev Containers** de VS Code.
 
-Este repositorio está preparado para usar un contenedor Postgres compartido:
-- **postgres-db** (puerto `55432 -> 5432`).
-- **Si no lo tienes**, crea uno con:
-```bash
-docker run -d --name postgres-db -p 55432:5432 -e POSTGRES_PASSWORD=postgres postgres:15
-```
+El modo predeterminado conecta con un PostgreSQL accesible desde el host Docker
+en el puerto `55432`; configura host, puerto y credenciales en `.env`. No depende de
+que el contenedor se llame `postgres-db`. Para una base aislada por proyecto,
+usa el perfil `local-db` descrito en [la guía de puesta en marcha](docs/base/03-puesta-en-marcha.md#base-de-datos-compartida-default-o-local-por-proyecto).
 
 ```bash
-# 1. Arranca la base de datos compartida
+# 1. Si usas el ejemplo de PostgreSQL compartido llamado postgres-db
+#    (si usas el perfil local, sáltate este comando):
 docker start postgres-db
 
 # 2. Variables de entorno (solo la primera vez; .env está gitignored)
 cp .env.example .env
-# Rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# Añade claves opcionales si usarás Codex o GitHub CLI.
 # OpenCode Go/Zen se conecta desde su TUI con /connect y guarda auth persistente.
 
 # 3. En VS Code: "Dev Containers: Rebuild and Reopen in Container"
-# 4. Dentro del contenedor:
+# 4. Dentro del contenedor, prepara explícitamente la base configurada:
+bin/rails db:prepare
+
+# 5. Arranca Rails:
 bin/dev
 ```
 
@@ -95,8 +97,11 @@ Detalles en [09 · Reutilizar como template](docs/base/09-renovar-template.md).
 ## Requisitos previos
 
 - Docker + VS Code Dev Containers
-- Un contenedor Postgres compartido `postgres-db` (puerto `55432 -> 5432`)
-- Un `.env` local con tus claves: `cp .env.example .env` (gitignored; ver
+- Un PostgreSQL accesible desde Docker en el host/puerto definidos por
+  `DB_HOST` y `DB_PORT`, o el perfil local por proyecto
+- `.env` permite personalizar la conexión PostgreSQL y las credenciales de
+  herramientas externas; copia `.env.example` si necesitas cambiar los valores
+  predeterminados (ver
   [02 · Configuración](docs/base/02-configuracion.md))
 
 ---

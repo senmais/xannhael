@@ -1,12 +1,12 @@
 # 03 · Puesta en marcha
 
 La forma recomendada de trabajar es con **Docker + Dev Containers de VS Code**,
-porque el contenedor trae Ruby, Postgres, Tailwind, las CLIs (codex/opencode) y
+porque el contenedor trae Ruby, el cliente de Postgres, Tailwind, las CLIs (codex/opencode) y
 las extensiones ya configuradas.
 
 ```mermaid
 flowchart TD
-    A["Requisitos: Docker +<br/>VS Code Dev Containers"] --> B["docker start postgres-db"]
+    A["Requisitos: Docker +<br/>VS Code Dev Containers"] --> B["Configura PostgreSQL"]
     B --> C["cp .env.example .env"]
     C --> D["Dev Containers:<br/>Rebuild and Reopen in Container"]
     D --> E["bin/dev"]
@@ -29,17 +29,21 @@ gitignored, así que cada persona lo tiene):
 
 ```bash
 cp .env.example .env
-# rellena las claves vacías: OPENAI_API_KEY, GITHUB_TOKEN (o GH_TOKEN).
+# añade claves opcionales si usarás Codex o GitHub CLI.
 # OpenCode Go/Zen se autentica dentro de OpenCode con /connect.
 ```
 
 **3. Abre el repo en VS Code** y ejecuta **Dev Containers: Rebuild and Reopen
-in Container**. La primera compilación baja la imagen de Rails, Ruby, Node y
-herramientas — tarda unos minutos.
+in Container**. La primera compilación baja la imagen de Ruby y las herramientas
+del contenedor — tarda unos minutos. Este template usa Importmap y Tailwind CSS
+para Rails, así que no instala Node ni un gestor de paquetes JavaScript. Si una
+aplicación derivada añade un `package.json`, puede habilitar la Feature Node en
+su `devcontainer.json`.
 
-Al crearse ejecuta el `postCreateCommand`: valida las credenciales de `codex`
-y `gh`, ajusta permisos, prepara pnpm y la autenticación GitHub, instala las
-gems que falten y ejecuta `bin/rails db:prepare`.
+Al crearse ejecuta el `postCreateCommand`: ajusta permisos de los volúmenes
+solo si aún no están inicializados e instala las gems que falten. No exige
+credenciales de servicios externos ni prepara o migra una base de datos
+automáticamente.
 
 **OpenCode Go/Zen (primera vez):** abre `opencode` en la terminal, ejecuta
 `/connect`, selecciona **OpenCode Go** o **OpenCode Zen** e introduce la API
@@ -50,8 +54,13 @@ rebuilds del devcontainer. No se requiere poner estas claves en `.env`.
 **4. Arranca la app** desde la terminal integrada:
 
 ```bash
+bin/rails db:prepare  # después de confirmar el host y la base de destino
 bin/dev
 ```
+
+`db:prepare` puede crear o migrar la base de datos configurada. Ejecútalo
+explícitamente después de revisar `DB_HOST` y los datos de conexión en
+`config/credentials.yml.enc` o en las variables de entorno.
 
 Esto lanza (vía **overmind**, que corre el `Procfile.dev` en una sesión tmux):
 
@@ -72,19 +81,31 @@ configuración del Ruby LSP **y** hace un handshake real con el servidor
 bin/rails lsp:check   # ver 08 · Pruebas y CI
 ```
 
-## Base de datos: compartida (default) u opcional
+## Base de datos: compartida (default) o local por proyecto
 
-Por defecto el compose **no** levanta ningún Postgres propio: la app usa el
-contenedor compartido del host (`postgres-db`, puerto `55432 → 5432`).
+Por defecto Compose no arranca el servicio local `db`: Rails se conecta al host
+Docker en `host.docker.internal:55432`. El listener del host puede tener cualquier
+nombre; `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD` en `.env` definen
+la conexión. El ejemplo `postgres-db` del README escucha en el puerto `55432`.
 
-Si prefieres una base **por proyecto**, en `.devcontainer/compose.yaml` tienes
-el servicio `db` y su volumen `postgres-data` comentados:
+Solo si prefieres una base **aislada por proyecto**, habilita el perfil `local-db`
+en `.env`:
 
-1. descomentarlos,
-2. poner `DB_HOST=db` en `.env` y alinear las credenciales
-   (`config/database.yml` lee host/puerto/usuario/password de las credenciales
-   cuando `DB_HOST` está definido),
-3. recrear el contenedor y `bin/rails db:prepare`.
+```bash
+# En .env, establece:
+DB_HOST=db
+COMPOSE_PROFILES=local-db
+```
+
+El servicio local usa PostgreSQL 18.6, arranca junto a Rails en la misma red
+Compose, no publica un puerto al host y guarda sus datos en `postgres-data`,
+aislado por proyecto. Después de cambiar `.env`, reconstruye el Dev Container y
+ejecuta `bin/rails db:prepare` manualmente. Si ya tienes datos creados con
+PostgreSQL 17 o anterior, PostgreSQL 18 no los abre directamente: respáldalos y
+planifica una actualización mayor antes de cambiar la imagen. Para un servidor
+PostgreSQL compartido, usa un usuario y permisos
+propios de la aplicación y configura sus dos bases Rails (`<slug>_development`
+y `<slug>_test`) antes de preparar la app.
 
 ## Selenium (solo para tests de sistema)
 
@@ -110,13 +131,22 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 | Volumen | Qué guarda |
 |---------|------------|
 | `bundle` | Gems instaladas (`/usr/local/bundle`) |
-| `agent-data` | Datos OpenCode (config, sesiones, credenciales, estado y caché) y extensiones de `gh` |
+| `agent-data` | Estado y configuración de OpenCode/Codex, preferencias Git/GitHub CLI, posible autenticación guardada y extensiones `gh` |
 
-> Solo hay dos volúmenes nombrados. El código se monta desde la raíz del repo
+El estado de Codex (`CODEX_HOME`) también queda dentro de `agent-data`, aislado
+por proyecto. El volumen `bundle` contiene gems instaladas y sigue siendo
+local a cada proyecto.
+
+La configuración GitHub y las extensiones de `gh` son opcionales. Cuando las
+necesites, ejecuta `bash .devcontainer/setup-gh.sh` dentro del contenedor.
+
+> El modo predeterminado tiene dos volúmenes nombrados (`bundle` y
+> `agent-data`); el perfil `local-db` añade `postgres-data`. El código se monta desde la raíz del repo
 > (`..`) en `/workspaces/project`; esa ruta interna es fija para que el
 > devcontainer siga funcionando después de renombrar el proyecto.
 > `XDG_CONFIG_HOME`, `XDG_STATE_HOME` y `XDG_CACHE_HOME` apuntan dentro de
-> `agent-data` para conservar toda la configuración local de OpenCode.
+> `agent-data` para conservar la configuración local de OpenCode, Codex, Git y
+> GitHub CLI.
 
 ## Git y GitHub desde el contenedor
 

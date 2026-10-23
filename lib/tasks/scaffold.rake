@@ -36,7 +36,7 @@ require "shellwords"
 #   PACKAGE      new Android applicationId/namespace, e.g. "com.acme.blog".
 #                Defaults to "com.example.<slug>".
 #   STRIP_SECRETS=1   also delete config/master.key + credentials.yml.enc.
-#                     Default: kept (required to boot in the devcontainer).
+#                     Default: kept; remove them only when sanitising a public copy.
 #
 # WHAT IT RENAMES (both Android and Rails):
 #   * Android package:        com.creadix.<old> -> com.acme.blog
@@ -47,34 +47,37 @@ require "shellwords"
 #     (DB names, rootProject.name, module name, README, locales, devcontainer,
 #      ENV["XANNHAEL_DATABASE_PASSWORD"])
 #
-# REQUIRED CREDENTIALS (to run in the devcontainer; kept by default):
-#   * config/master.key + config/credentials.yml.enc with a `database` key
-#     (host, port, username, password). In development, DB_HOST (set by the
-#     devcontainer) makes config/database.yml read
-#     Rails.application.credentials.database. Without it the app cannot
-#     connect to the shared postgres-db container.
+# DATABASE CONFIGURATION (kept by default):
+#   * config/master.key + config/credentials.yml.enc may provide a `database`
+#     key (host, port, username, password). DB_HOST/DB_PORT/DB_USERNAME/
+#     DB_PASSWORD in the ignored .env override these values for development.
+#     The default DB_HOST reaches a shared PostgreSQL listener on the host;
+#     alternatively use the project-local Compose profile with DB_HOST=db.
 #     Generate/refresh with:  bin/rails credentials:edit
-#   * The shared postgres-db container running:  docker start postgres-db
-#   * Env vars the devcontainer sets itself (no action needed): DB_HOST,
+#   * Ensure the selected PostgreSQL service is running before starting Rails.
+#   * Env vars the devcontainer sets itself (no action needed):
 #     PGHOST/PGPORT/PGUSER/PGPASSWORD, SELENIUM_HOST, CAPYBARA_SERVER_PORT.
-#   * Required for the devcontainer lifecycle (not by Rails itself):
-#     OPENAI_API_KEY (codex) and one of GITHUB_TOKEN/GH_TOKEN (gh CLI).
+#   * Optional credentials for the devcontainer:
+#     OPENAI_API_KEY (Codex) and one of GITHUB_TOKEN/GH_TOKEN (GitHub CLI).
 #     OpenCode Go/Zen auth is configured once with /connect and persisted in
 #     the agent-data volume. KAMAL_REGISTRY_PASSWORD (deploy) and
 #     XANNHAEL_DATABASE_PASSWORD (production DB only) remain optional.
 #
 # WHAT IT SKIPS (never touched):
 #   * .git                    (history kept; the 'origin' remote IS removed)
+#   * Docker volumes/data     (never renamed, copied, deleted, or reset)
+#   * bundler-download-cache  (stable external cache shared between clones)
 #   * local / generated       (local.properties, build/, .gradle/, .idea/,
 #                              log/, tmp/, storage/, .ruby-lsp/)
 #   * secrets                 (master.key + credentials.yml.enc, only when
-#                              STRIP_SECRETS=1). If stripped, run
-#                              bin/rails credentials:edit in the new project.
+#                              STRIP_SECRETS=1). If stripped, create new Rails
+#                              credentials when the application needs them.
 #
 # AFTER RUNNING:
 #   1. git remote add origin <your-new-repo-url>
 #   2. git add -A && git commit              (records the rename)
-#   3. bin/dev + run the Android app from mobile/android (Android Studio
+#   3. Review DB_* and run bin/rails db:prepare manually before the first start.
+#   4. bin/dev + run the Android app from mobile/android (Android Studio
 #      recreates its own local.properties)
 # =============================================================================
 
@@ -126,14 +129,15 @@ namespace :scaffold do
     puts "\nDone. Next steps:"
     puts "  1. git remote add origin <your-new-repo-url>"
     puts "  2. git add -A && git commit    (records the rename)"
-    puts "  3. bin/dev + run the Android app from mobile/android"
+    puts "  3. Review DB_* and run bin/rails db:prepare before the first start."
+    puts "  4. bin/dev + run the Android app from mobile/android"
     puts "     (Android Studio recreates its own local.properties)"
     if strip_secrets
-      puts "  4. bin/rails credentials:edit  (secrets were stripped; the new"
-      puts "     project needs a `database` key to boot in the devcontainer)"
+      puts "  Rails credentials were stripped. Recreate them if the app needs"
+      puts "  them: bin/rails credentials:edit."
     else
-      puts "  Credentials were kept (needed to boot). If you stripped/need fresh"
-      puts "  ones: bin/rails credentials:edit  (add the `database` key)."
+      puts "  Credentials were kept. If you stripped/need fresh ones:"
+      puts "  bin/rails credentials:edit  (add a `database` key if desired)."
     end
   end
 
@@ -150,6 +154,9 @@ namespace :scaffold do
 
   # Renames paths and rewrites contents in place, then prunes empty directories.
   def rename_in_place(root, excluded, content_repls, path_repls)
+    # Preserve the stable external Docker volume name while rewriting the app
+    # slug in files such as compose.yaml and devcontainer.json.
+    stable_volume_names = [ "bundler-download-cache" ]
     files = Dir.glob(File.join(root, "**", "*"), File::FNM_DOTMATCH).select { |p| File.file?(p) }
     files.each do |src|
       rel = rel_of(root, src)
@@ -158,7 +165,13 @@ namespace :scaffold do
 
       dst = File.join(root, *rel_path(rel, path_repls).split("/"))
       content = File.read(src, encoding: "UTF-8")
+      protected_names = stable_volume_names.each_with_index.map do |name, index|
+        token = "\u0000SCAFFOLD_SHARED_VOLUME_#{index}\u0000"
+        content = content.gsub(name, token)
+        [ token, name ]
+      end
       content_repls.each { |a, b| content = content.gsub(a, b) }
+      protected_names.each { |token, name| content = content.gsub(token, name) }
 
       if dst == src
         File.write(dst, content)
