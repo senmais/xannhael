@@ -6,7 +6,7 @@ las extensiones ya configuradas.
 
 ```mermaid
 flowchart TD
-    A["Requisitos: Docker +<br/>VS Code Dev Containers"] --> B["docker start postgres-db"]
+    A["Requisitos: Docker +<br/>VS Code Dev Containers"] --> B["Configura PostgreSQL"]
     B --> C["cp .env.example .env"]
     C --> D["Dev Containers:<br/>Rebuild and Reopen in Container"]
     D --> E["bin/dev"]
@@ -80,20 +80,27 @@ configuración del Ruby LSP **y** hace un handshake real con el servidor
 bin/rails lsp:check   # ver 08 · Pruebas y CI
 ```
 
-## Base de datos: compartida (default) u opcional
+## Base de datos: compartida (default) o local por proyecto
 
-Por defecto el compose **no** levanta ningún Postgres propio: la app usa el
-contenedor compartido del host (`postgres-db`, puerto `55432 → 5432`).
+Por defecto Compose no arranca PostgreSQL: Rails se conecta al host Docker en
+`host.docker.internal:55432`. El listener del host puede tener cualquier
+nombre; `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD` en `.env` definen
+la conexión. El ejemplo `postgres-db` del README escucha en el puerto `55432`.
 
-Si prefieres una base **por proyecto**, en `.devcontainer/compose.yaml` tienes
-el servicio `db` y su volumen `postgres-data` comentados:
+Si prefieres una base **aislada por proyecto**, inicia el servicio opcional:
 
-1. descomentarlos,
-2. poner `DB_HOST=db` en `.env` y alinear las credenciales
-   (`config/database.yml` lee host/puerto/usuario/password de las credenciales
-   cuando `DB_HOST` está definido),
-3. recrear el contenedor y ejecutar `bin/rails db:prepare` manualmente después
-   de revisar el host y la base destino.
+```bash
+# En .env, establece:
+DB_HOST=db
+COMPOSE_PROFILES=local-db
+```
+
+El servicio arranca junto a Rails en la misma red Compose, no publica un puerto
+al host y guarda sus datos en `postgres-data`, aislado por proyecto. Después de
+cambiar `.env`, reconstruye el Dev Container y ejecuta `bin/rails db:prepare`
+manualmente. Para un servidor PostgreSQL compartido, usa un usuario y permisos
+propios de la aplicación y configura sus dos bases Rails (`<slug>_development`
+y `<slug>_test`) antes de preparar la app.
 
 ## Selenium (solo para tests de sistema)
 

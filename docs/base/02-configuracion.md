@@ -8,15 +8,15 @@ existe y cuándo debes tocarla.
 flowchart LR
     A["config/master.key<br/>+ credentials.yml.enc"] -->|"database key"| B["config/database.yml"]
     C[".env (gitignored)<br/>cargado por compose env_file"] --> B
-    B --> D["PostgreSQL postgres-db"]
+    B --> D["PostgreSQL configurable"]
     B --> E["SQLite solid_* (storage/)"]
 ```
 
-## 1. Credenciales de Rails (obligatorio)
+## 1. Credenciales de Rails (alternativa)
 
 `config/master.key` + `config/credentials.yml.enc` guardan datos sensibles
-cifrados. El devcontainer necesita una clave `database` para conectar con el
-Postgres compartido:
+cifrados. Si no defines las cuatro variables `DB_HOST`, `DB_PORT`,
+`DB_USERNAME` y `DB_PASSWORD`, Rails puede leerlas de la clave `database`:
 
 ```yaml
 database:
@@ -32,13 +32,16 @@ Para verlas o editarlas:
 bin/rails credentials:edit
 ```
 
-> ⚠️ Sin esta clave la app **no arranca**: en desarrollo, `DB_HOST` (que llega
-> al contenedor desde `.env`) hace que `database.yml` lea
-> `Rails.application.credentials.database`.
+En el Dev Container, Compose define las cuatro variables `DB_*` con valores
+predeterminados y puedes cambiarlas desde `.env`; esas variables prevalecen
+sobre Rails credentials. Fuera del contenedor, Rails usa la clave `database`
+si falta alguna variable.
 
-## 2. El contenedor Postgres compartido (obligatorio)
+## 2. PostgreSQL compartido o local
 
-La app usa un contenedor compartido llamado `postgres-db`:
+Por defecto la app se conecta a PostgreSQL en el host Docker
+(`host.docker.internal:55432`). El nombre del contenedor del host no importa.
+Si usas el ejemplo `postgres-db` del README, arráncalo manualmente:
 
 ```bash
 docker start postgres-db
@@ -77,8 +80,9 @@ reenvían estas variables desde el host.
 
 | Variable | Para qué sirve |
 |----------|----------------|
-| `DB_HOST` | Activa la conexión a `credentials.database` (`host.docker.internal`) |
-| `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` | Cliente `psql` + conexión al `postgres-db` del host (puerto `55432`) |
+| `DB_HOST` / `DB_PORT` | Host y puerto de PostgreSQL (por defecto `host.docker.internal:55432`; `db:5432` en modo local) |
+| `DB_USERNAME` / `DB_PASSWORD` | Usuario y contraseña PostgreSQL; en un servidor compartido, usa un usuario propio por proyecto |
+| `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` | Los mismos valores para el cliente `psql`, configurados por Compose |
 | `SELENIUM_HOST` / `CAPYBARA_SERVER_PORT` | Tests de sistema (Selenium arranca bajo demanda) |
 | `RUBY_DEBUG_OPEN` / `RUBY_DEBUG_LAZY` | Depurador remoto (`debug`) |
 
@@ -141,5 +145,15 @@ Prepara todo con:
 ```bash
 bin/rails db:prepare  # revisa DB_HOST y el destino configurado antes de ejecutar
 ```
+
+El nombre de la base de desarrollo y de test deriva del slug cambiado por
+`scaffold:rename`. Para un servidor compartido, provisiona esas dos bases con
+un usuario propietario propio del proyecto y configura sus datos en `.env`.
+Para PostgreSQL aislado por proyecto, consulta [03 · Puesta en marcha](03-puesta-en-marcha.md).
+
+Si actualizas desde una configuración anterior que guardaba usuario o
+contraseña PostgreSQL en Rails credentials, copia esos valores a `DB_USERNAME`
+y `DB_PASSWORD` en `.env`; Compose define esos valores por defecto y los usa
+antes que las credenciales cifradas.
 
 Continúa con [03 · Puesta en marcha](03-puesta-en-marcha.md).

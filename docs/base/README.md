@@ -17,10 +17,12 @@ lo necesites, sin sentirte abrumado. Si eres nuevo, empieza por
 | 07 | [Despliegue a producción](07-despliegue.md) | Docker, Kamal y Thruster |
 | 08 | [Pruebas y CI](08-pruebas-y-ci.md) | Tests, RuboCop, Brakeman, GitHub Actions y el check del Ruby LSP |
 | 09 | [Reutilizar como template](09-renovar-template.md) | Renombrar el repo para un proyecto nuevo |
+| 10 | [Infraestructura de desarrollo](10-infraestructura-desarrollo.md) | Arquitectura Docker, recursos, auditoría y consumo |
 
 ## Rutas rápidas
 
 - Levantar el proyecto → [03](03-puesta-en-marcha.md)
 - Configurar la base de datos → [02](02-configuracion.md)
+- Revisar Docker, volúmenes y consumo → [10](10-infraestructura-desarrollo.md)
 - Inspeccionar trabajos en segundo plano → http://localhost:3000/jobs
 - Ver la app → http://localhost:3000

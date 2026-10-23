@@ -34,9 +34,6 @@
     // No re-anadirlas aqui con ${localEnv:...}: una var de host ausente
     // expande a string vacio y pisa el valor de .env.
 
-    // DB_HOST triggers the shared postgres-db connection from config/database.yml.
-    "DB_HOST": "host.docker.internal",
-
     // Git must trust the bind-mounted workspace before VS Code itself starts
     // inspecting the repository. setup-gh.sh runs too late for this initial check.
     "GIT_CONFIG_COUNT": "1",
@@ -60,13 +57,8 @@
 
     // Parallel gem installation when dependencies actually change.
     "BUNDLE_JOBS": "8",
-    "BUNDLE_RETRY": "3",
+    "BUNDLE_RETRY": "3"
 
-    // For the psql client.
-    "PGHOST": "host.docker.internal",
-    "PGPORT": "55432",
-    "PGUSER": "postgres",
-    "PGPASSWORD": "postgres"
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.

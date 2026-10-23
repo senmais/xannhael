@@ -49,7 +49,7 @@ graph TB
         Dev3 --> Dev4["Web server :3000"]
         Dev3 --> Dev5["Tailwind watch"]
         Dev3 --> Dev6["Solid Queue worker"]
-        Dev2 --> Dev7["Postgres compartido<br/>(postgres-db)"]
+        Dev2 --> Dev7["Postgres configurable<br/>(compartido o local)"]
         Dev2 --> Dev8["SQLite solid_* (storage/)"]
     end
 

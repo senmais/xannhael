@@ -5,13 +5,25 @@ services:
       dockerfile: .devcontainer/Dockerfile
 
     # Load .env from project root (if it exists) into the container.
-    # .env is the single source of truth for tool credentials
-    # (OPENAI_API_KEY, GITHUB_TOKEN/GH_TOKEN). OpenCode Go/Zen auth is persisted separately.
+    # .env contains optional tool credentials and per-project database settings.
+    # OpenCode Go/Zen auth is persisted separately.
     env_file:
       - path: ../.env
         required: false
 
-    # Reach the shared postgres-db container running on the host
+    # Shared PostgreSQL defaults; override in the project .env. The PG* values
+    # keep psql aligned with Active Record.
+    environment:
+      DB_HOST: ${DB_HOST:-host.docker.internal}
+      DB_PORT: ${DB_PORT:-55432}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      PGHOST: ${DB_HOST:-host.docker.internal}
+      PGPORT: ${DB_PORT:-55432}
+      PGUSER: ${DB_USERNAME:-postgres}
+      PGPASSWORD: ${DB_PASSWORD:-postgres}
+
+    # Docker Desktop / WSL2 host gateway for shared PostgreSQL by default.
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -24,33 +36,26 @@ services:
     command: sleep infinity
 
   # ---------------------------------------------------------------------------
-  # Optional local services. Both are disabled by default.
+  # Optional local services.
   # ---------------------------------------------------------------------------
-  # To use a project-local database instead of the shared postgres-db:
-  #   1. Uncomment the `db` service and the `postgres-data` volume.
-  #   2. Set DB_HOST=db in .env and align Rails credentials
-  #      (config/database.yml reads host/port/user/password from credentials
-  #      when DB_HOST is set; defaults target the shared container).
-  #   3. Recreate the container and run `bin/rails db:prepare`.
-  #
-  # db:
-  #   image: postgres:15
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
+  # Enable the local DB by setting COMPOSE_PROFILES=local-db and DB_HOST=db in
+  # the project .env, then rebuild the Dev Container. The DB has no host port;
+  # its Compose-scoped volume stays local to this clone.
+  db:
+    image: postgres:15.19
+    profiles: [local-db]
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   selenium:
-    image: selenium/standalone-chromium
-    restart: unless-stopped
+    image: selenium/standalone-chromium:4.51.0-20261010
     # Only started on demand (see above); the rails-app reaches it as
     # SELENIUM_HOST=selenium via test/application_system_test_case.rb.
     profiles:
@@ -59,3 +64,4 @@ services:
 volumes:
   bundle:
   agent-data:
+  postgres-data:

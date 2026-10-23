@@ -105,3 +105,30 @@ por ello no se pudo medir una línea base de ejecución. No se estiman cifras.
 - Consulta `docker system df` y el listado de volúmenes para diagnosticar el
   consumo. Antes de retirar un recurso, identifica qué proyectos lo usan y
   conserva una copia de los datos que necesites.
+
+## Cambios aplicados
+
+- Las credenciales de Codex y GitHub dejaron de ser requisitos del ciclo de
+  creación. GitHub CLI se configura bajo demanda. El hook ya no prepara bases
+  automáticamente ni inicia PostgreSQL externo.
+- Se retiraron Node y pnpm de la imagen base porque esta app usa Importmap y
+  Gems y no contiene manifiestos JavaScript. Un proyecto derivado puede activar
+  la Feature Node cuando la necesite.
+- `CODEX_HOME` persiste en `agent-data`, separado por proyecto. Los volúmenes de
+  Gems y agentes no se comparten entre proyectos.
+- PostgreSQL acepta `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD`. El modo
+  compartido usa un listener del host configurable. El perfil `local-db` crea
+  un servicio y volumen aislados, sin publicar su puerto.
+- El primer arranque de base es explícito: se revisa la conexión y se ejecuta
+  `bin/rails db:prepare` a mano. Las bases de desarrollo y test reciben nombres
+  derivados del slug que `scaffold:rename` escribe en `config/database.yml`.
+- Las imágenes del servicio local de PostgreSQL y de Selenium tienen etiquetas
+  fijas. PostgreSQL local y Selenium no tienen política de reinicio autónomo;
+  se inician desde el perfil o bajo demanda.
+- Las gems instaladas y sus archivos de instalación quedan dentro del volumen
+  `bundle` de cada proyecto. No se comparte un árbol de instalación compatible
+  solo por nombre: Ruby, arquitectura y extensiones nativas pueden diferir.
+
+La compilación y el arranque no se midieron porque el daemon Docker no estaba
+disponible en la sesión. Los checks de configuración locales pasan; consulta el
+resultado final de la auditoría para las limitaciones de validación.

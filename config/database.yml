@@ -2,8 +2,8 @@
 # database in every environment, plus separate DBs for the test suite and
 # production (CI sets DATABASE_URL; production uses separate DBs).
 #
-# In development the primary database is PostgreSQL (via the shared
-# postgres-db container set up by the devcontainer), while Solid Cache,
+# In development the primary database is PostgreSQL (shared host instance by
+# default, or the optional project-local Compose service), while Solid Cache,
 # Solid Queue and Solid Cable each get their own SQLite3 file so the
 # solid_* services run locally without extra infrastructure.
 #
@@ -25,11 +25,14 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  <% if ENV["DB_HOST"] && (db_creds = Rails.application.credentials.database) %>
-  host: <%= db_creds.host %>
-  port: <%= db_creds.port %>
-  username: <%= db_creds.username %>
-  password: <%= db_creds.password %>
+  <% db_env_keys = %w[DB_HOST DB_PORT DB_USERNAME DB_PASSWORD] %>
+  <% db_creds = db_env_keys.all? { |key| ENV.key?(key) } ? nil : Rails.application.credentials.database %>
+  # DB_* variables override credentials for shared or project-local hosts.
+  <% if ENV["DB_HOST"] || db_creds %>
+  host: <%= ENV["DB_HOST"] || db_creds&.host %>
+  port: <%= ENV["DB_PORT"] || db_creds&.port %>
+  username: <%= ENV["DB_USERNAME"] || db_creds&.username %>
+  password: <%= ENV["DB_PASSWORD"] || db_creds&.password %>
   <% end %>
 
 

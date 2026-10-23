@@ -63,9 +63,9 @@ flowchart TB
 - **`.git`** — conserva el historial; solo elimina el remote `origin`.
 - Archivos locales/generados: `local.properties`, `build/`, `.gradle/`,
   `.idea/`, `log/`, `tmp/`, `storage/`, `.ruby-lsp/`.
-- **Credenciales** (`master.key`, `credentials.yml.enc`) — se conservan porque
-  el devcontainer las necesita para arrancar. Pasa `STRIP_SECRETS=1` para
-  borrarlas y después ejecuta `bin/rails credentials:edit`.
+- **Credenciales** (`master.key`, `credentials.yml.enc`) — se conservan por
+  defecto. Pasa `STRIP_SECRETS=1` para borrarlas; vuelve a generarlas si la app
+  usa secretos Rails o si prefieres guardar allí la configuración PostgreSQL.
 - **`.env` local** — sí se reescribe si existe (lleva
   `XANNHAEL_DATABASE_PASSWORD`); al ser gitignored, cada persona lo suya.
   Si no existe, créalo: `cp .env.example .env`.
@@ -86,10 +86,13 @@ Tras renombrar, **reconstruye el contenedor** para que aplique todo.
 1. `git remote add origin <tu-nuevo-repo-url>`
 2. `git add -A && git commit`
 3. Rebuild del contenedor (Dev Containers: Rebuild and Reopen in Container)
-4. `bin/dev` + abre la app Android desde `mobile/android` (Android Studio
+4. revisa `DB_*` y ejecuta `bin/rails db:prepare` manualmente antes del primer
+   arranque
+5. `bin/dev` + abre la app Android desde `mobile/android` (Android Studio
    recrea su propio `local.properties`)
 
-> Si usaste `STRIP_SECRETS=1`, ejecuta `bin/rails credentials:edit` y añade la
-> clave `database` (ver [02 · Configuración](02-configuracion.md)).
+> Si usaste `STRIP_SECRETS=1` y quieres guardar la conexión PostgreSQL en
+> Rails credentials en vez de `.env`, ejecuta `bin/rails credentials:edit` y
+> añade la clave `database` (ver [02 · Configuración](02-configuracion.md)).
 
 Detalles completos en `lib/tasks/scaffold.rake`.
