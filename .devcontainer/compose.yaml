@@ -31,6 +31,7 @@ services:
       - ..:/workspaces/project:cached
       - bundle:/usr/local/bundle
       - agent-data:/home/vscode/.local/share
+      - bundler-download-cache:/home/vscode/.bundle/cache/gems
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -65,3 +66,6 @@ volumes:
   bundle:
   agent-data:
   postgres-data:
+  bundler-download-cache:
+    external: true
+    name: xannhael-bundler-download-cache

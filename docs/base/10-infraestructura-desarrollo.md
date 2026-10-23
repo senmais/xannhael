@@ -50,6 +50,9 @@ Android y documentación de inicio.
 - `CODEX_HOME` por defecto es `~/.codex`, fuera del volumen `agent-data`;
   reconstruir el contenedor podía perder la configuración y las sesiones de
   Codex.
+- Git y GitHub CLI guardaban su configuración en `/home/vscode/.config`, que
+  no estaba montada. La configuración de Git, GitHub CLI y extensiones debe
+  quedar en el volumen del proyecto.
 - El repositorio no contiene `package.json` ni lockfile de npm, pnpm o Yarn;
   usa Importmap y Tailwind CSS desde Gems. Node y pnpm se retiraron del
   contenedor base. Una aplicación derivada con dependencias JavaScript puede
@@ -64,8 +67,9 @@ Android y documentación de inicio.
    debe arrancar ni modificar bases externas, ni crear, migrar o borrar datos
    automáticamente fuera de las bases de la aplicación.
 3. Gems instaladas, `node_modules`, SQLite, uploads, credenciales y estado de
-   agentes se mantienen por proyecto. Si se añade una caché global, se limita
-   a artefactos descargados y se documenta su compatibilidad y nombre estable.
+   agentes se mantienen por proyecto. Solo los archivos descargados de gems
+   se comparten en un volumen externo estable; instalaciones y extensiones
+   compiladas se mantienen locales.
 4. La configuración de agentes persiste por proyecto para no mezclar sesiones
    ni credenciales. El código y los volúmenes de datos de Compose también
    permanecen separados por clon.
@@ -111,11 +115,15 @@ por ello no se pudo medir una línea base de ejecución. No se estiman cifras.
 - Las credenciales de Codex y GitHub dejaron de ser requisitos del ciclo de
   creación. GitHub CLI se configura bajo demanda. El hook ya no prepara bases
   automáticamente ni inicia PostgreSQL externo.
+- `init-volumes.sh` guarda un marcador en cada volumen tras el ajuste inicial
+  de propietario. Los rebuilds posteriores evitan recorrer nuevamente todas
+  las gems y sesiones persistentes.
 - Se retiraron Node y pnpm de la imagen base porque esta app usa Importmap y
   Gems y no contiene manifiestos JavaScript. Un proyecto derivado puede activar
   la Feature Node cuando la necesite.
 - `CODEX_HOME` persiste en `agent-data`, separado por proyecto. Los volúmenes de
-  Gems y agentes no se comparten entre proyectos.
+  Gems y agentes no se comparten entre proyectos. Git y GitHub CLI usan ahora
+  el mismo volumen para sus preferencias, autenticación y extensiones.
 - PostgreSQL acepta `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD`. El modo
   compartido usa un listener del host configurable. El perfil `local-db` crea
   un servicio y volumen aislados, sin publicar su puerto.
@@ -128,6 +136,9 @@ por ello no se pudo medir una línea base de ejecución. No se estiman cifras.
 - Las gems instaladas y sus archivos de instalación quedan dentro del volumen
   `bundle` de cada proyecto. No se comparte un árbol de instalación compatible
   solo por nombre: Ruby, arquitectura y extensiones nativas pueden diferir.
+- Un volumen Docker externo y estable comparte los archivos descargados de
+  gems entre clones. Bundler conserva las instalaciones en `bundle` por
+  proyecto; índices y extensiones no se montan en ese volumen.
 - El contexto de la imagen Rails de producción excluye documentación, tests,
   cliente Android, Procfile de desarrollo y configuración de agentes; no son
   archivos de ejecución de esa imagen.

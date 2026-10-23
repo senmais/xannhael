@@ -40,9 +40,10 @@ para Rails, así que no instala Node ni un gestor de paquetes JavaScript. Si una
 aplicación derivada añade un `package.json`, puede habilitar la Feature Node en
 su `devcontainer.json`.
 
-Al crearse ejecuta el `postCreateCommand`: ajusta permisos e instala las gems
-que falten. No exige credenciales de servicios externos ni prepara o migra una
-base de datos automáticamente.
+Al crearse ejecuta el `postCreateCommand`: ajusta permisos de los volúmenes
+solo si aún no están inicializados e instala las gems que falten. No exige
+credenciales de servicios externos ni prepara o migra una base de datos
+automáticamente.
 
 **OpenCode Go/Zen (primera vez):** abre `opencode` en la terminal, ejecuta
 `/connect`, selecciona **OpenCode Go** o **OpenCode Zen** e introduce la API
@@ -126,7 +127,7 @@ docker compose -f .devcontainer/compose.yaml up -d selenium
 | Volumen | Qué guarda |
 |---------|------------|
 | `bundle` | Gems instaladas (`/usr/local/bundle`) |
-| `agent-data` | Datos OpenCode (config, sesiones, credenciales, estado y caché) y extensiones de `gh` |
+| `agent-data` | Estado y configuración de OpenCode/Codex, preferencias Git/GitHub CLI, posible autenticación guardada y extensiones `gh` |
 
 El estado de Codex (`CODEX_HOME`) también queda dentro de `agent-data`, aislado
 por proyecto. El volumen `bundle` contiene gems instaladas y sigue siendo
@@ -135,11 +136,13 @@ local a cada proyecto.
 La configuración GitHub y las extensiones de `gh` son opcionales. Cuando las
 necesites, ejecuta `bash .devcontainer/setup-gh.sh` dentro del contenedor.
 
-> Solo hay dos volúmenes nombrados. El código se monta desde la raíz del repo
+> El modo predeterminado tiene dos volúmenes nombrados (`bundle` y
+> `agent-data`); el perfil `local-db` añade `postgres-data`. El código se monta desde la raíz del repo
 > (`..`) en `/workspaces/project`; esa ruta interna es fija para que el
 > devcontainer siga funcionando después de renombrar el proyecto.
 > `XDG_CONFIG_HOME`, `XDG_STATE_HOME` y `XDG_CACHE_HOME` apuntan dentro de
-> `agent-data` para conservar toda la configuración local de OpenCode.
+> `agent-data` para conservar la configuración local de OpenCode, Codex, Git y
+> GitHub CLI.
 
 ## Git y GitHub desde el contenedor
 

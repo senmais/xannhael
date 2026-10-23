@@ -76,8 +76,8 @@ La configuración del contenedor es agnóstica al nombre del proyecto: monta la
 raíz del repositorio en `/workspaces/project`, así que el `SLUG` y el nombre de
 la carpeta pueden cambiar sin editar rutas. Compose crea los volúmenes con un
 prefijo según el proyecto; al renombrar, los volúmenes anteriores quedan
-huérfanos. Si quieres conservar las gems, transfiere el volumen `bundle`; los
-datos de OpenCode están en `agent-data`.
+huérfanos. Si quieres conservar las gems, transfiere el volumen `bundle`; el
+estado de agentes y la configuración Git/GitHub CLI están en `agent-data`.
 
 Tras renombrar, **reconstruye el contenedor** para que aplique todo.
 

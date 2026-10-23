@@ -3,12 +3,17 @@
 set -euo pipefail
 
 WORKSPACE_DIR="${WORKSPACE_DIR:-/workspaces/project}"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-/home/vscode/.local/share/.config}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-/home/vscode/.local/share}"
+GIT_CONFIG_GLOBAL="${GIT_CONFIG_GLOBAL:-${XDG_CONFIG_HOME}/git/config}"
+GH_CONFIG_DIR="${GH_CONFIG_DIR:-${XDG_CONFIG_HOME}/gh}"
+export XDG_CONFIG_HOME XDG_DATA_HOME GIT_CONFIG_GLOBAL GH_CONFIG_DIR
 
 # 0. Preparar directorios persistentes.
 mkdir -p \
-  /home/vscode/.config/git \
-  /home/vscode/.config/gh \
-  /home/vscode/.local/share/gh/extensions
+  "$(dirname "$GIT_CONFIG_GLOBAL")" \
+  "$GH_CONFIG_DIR" \
+  "${XDG_DATA_HOME}/gh/extensions"
 
 # 1. El workspace viene bind-mounteado desde el host: evitar "dubious ownership".
 if ! git config --global --get-all safe.directory 2>/dev/null | grep -qFx "$WORKSPACE_DIR"; then

@@ -24,7 +24,12 @@ RUN curl -fsSL https://github.com/DarthSim/overmind/releases/download/v2.5.1/ove
     test -x /usr/local/bin/overmind
 
 # Codex CLI (standalone binary, no Node). Runtime state lives in the project-scoped agent-data volume.
-RUN curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_HOME=/home/vscode/.codex CODEX_INSTALL_DIR=/usr/local/bin sh && \
+ENV CODEX_HOME="/home/vscode/.local/share/codex"
+
+RUN mkdir -p "$CODEX_HOME"
+RUN mkdir -p /home/vscode/.bundle/cache/gems && chown -R vscode:vscode /home/vscode/.bundle
+
+RUN curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_INSTALL_DIR=/usr/local/bin sh && \
     test -x /usr/local/bin/codex
 
 # OpenCode V2 CLI: dedicated V2 installer. Keep the binary on PATH for all shells.
@@ -33,20 +38,15 @@ RUN export HOME=/home/vscode && \
     ln -sf /home/vscode/.opencode/bin/opencode /usr/local/bin/opencode && \
     test -x /usr/local/bin/opencode && /usr/local/bin/opencode --version
 
-ENV CODEX_HOME="/home/vscode/.local/share/codex"
-
 # Pre-create persistent state dirs owned by vscode so the named volumes stay writable.
-# NOTE: OpenCode uses ~/.local/state/opencode/service.json (XDG state),
-# not just config/share, so the state dir must exist and be owned by vscode.
-RUN mkdir -p /home/vscode/.codex \
-               /home/vscode/.local/share/codex \
-               /home/vscode/.config/opencode \
+# XDG_CONFIG_HOME and XDG_STATE_HOME point into agent-data at runtime.
+RUN mkdir -p /home/vscode/.local/share/codex \
+               /home/vscode/.local/share/.config/opencode \
                /home/vscode/.local/share/opencode \
-               /home/vscode/.local/state/opencode && \
-      chown -R vscode:vscode /home/vscode/.codex \
-                             /home/vscode/.local/share/codex \
-                             /home/vscode/.config/opencode \
+               /home/vscode/.local/share/.state/opencode && \
+      chown -R vscode:vscode /home/vscode/.local/share/codex \
+                             /home/vscode/.local/share/.config/opencode \
                              /home/vscode/.local/share/opencode \
-                             /home/vscode/.local/state/opencode
+                             /home/vscode/.local/share/.state/opencode
 
 USER vscode

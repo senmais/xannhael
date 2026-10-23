@@ -6,6 +6,7 @@
   "dockerComposeFile": "compose.yaml",
   "service": "rails-app",
   "workspaceFolder": "/workspaces/project",
+  "initializeCommand": "docker volume create xannhael-bundler-download-cache",
 
   // Use the standard non-root development user.
   "remoteUser": "vscode",
@@ -40,11 +41,11 @@
     "GIT_CONFIG_KEY_0": "safe.directory",
     "GIT_CONFIG_VALUE_0": "/workspaces/project",
 
-    // Keep Git's persistent global configuration under ~/.config.
-    "GIT_CONFIG_GLOBAL": "/home/vscode/.config/git/config",
+    // Keep Git and GitHub CLI configuration inside the project-scoped volume.
+    "GIT_CONFIG_GLOBAL": "/home/vscode/.local/share/.config/git/config",
 
-    // Explicit gh configuration path.
-    "GH_CONFIG_DIR": "/home/vscode/.config/gh",
+    // GitHub CLI config and authentication state are project-scoped as well.
+    "GH_CONFIG_DIR": "/home/vscode/.local/share/.config/gh",
 
     // Keep OpenCode config, sessions, service state and cache under one volume.
     "XDG_CONFIG_HOME": "/home/vscode/.local/share/.config",
@@ -54,6 +55,9 @@
 
     // Bundler installation path.
     "BUNDLE_PATH": "/usr/local/bundle",
+    // Share downloaded gem archives; installed gems stay project-scoped.
+    "BUNDLE_USER_CACHE": "/home/vscode/.bundle/cache",
+    "BUNDLE_GLOBAL_GEM_CACHE": "true",
 
     // Parallel gem installation when dependencies actually change.
     "BUNDLE_JOBS": "8",
@@ -124,7 +128,7 @@
     }
   },
 
-  // Keep optional credentials and database changes out of container creation.
-  // Prepare a selected database manually after reviewing its target.
-  "postCreateCommand": "sudo chown -R vscode:vscode /usr/local/bundle /home/vscode/.local/share && mkdir -p storage /home/vscode/.config/git /home/vscode/.config/gh /home/vscode/.local/share/gh/extensions /home/vscode/.local/share/.config/opencode /home/vscode/.local/share/.state/opencode /home/vscode/.local/share/.cache/opencode /home/vscode/.local/share/codex && (bundle check || bundle install)"
+  // Initialize volume ownership once, then install gems only when needed.
+  // Optional credentials and database changes stay out of container creation.
+  "postCreateCommand": "bash .devcontainer/init-volumes.sh && (bundle check || bundle install)"
 }
