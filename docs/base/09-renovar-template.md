@@ -50,7 +50,7 @@ flowchart TB
         R1["Nombres de DB"]
         R2["rootProject.name / módulo"]
         R3["Locales (es.yml/en.yml)"]
-        R4["Devcontainer + compose<br/>(volúmenes xannhael-*, ruta /workspaces/…)"]
+        R4["Devcontainer + compose<br/>(ajustes por SLUG; caché global preservada)"]
         R5["ENV['XANNHAEL_DATABASE_PASSWORD']"]
         R6[".env.example"]
     end
@@ -78,6 +78,10 @@ la carpeta pueden cambiar sin editar rutas. Compose crea los volúmenes con un
 prefijo según el proyecto; al renombrar, los volúmenes anteriores quedan
 huérfanos. Si quieres conservar las gems, transfiere el volumen `bundle`; el
 estado de agentes y la configuración Git/GitHub CLI están en `agent-data`.
+
+La tarea no modifica datos Docker ni renombra volúmenes. `bundle`, `agent-data`
+y `postgres-data` son locales al proyecto; `bundler-download-cache` mantiene
+un nombre externo estable y comparte únicamente descargas de gems entre clones.
 
 Tras renombrar, **reconstruye el contenedor** para que aplique todo.
 

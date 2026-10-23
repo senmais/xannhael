@@ -65,6 +65,8 @@ require "shellwords"
 #
 # WHAT IT SKIPS (never touched):
 #   * .git                    (history kept; the 'origin' remote IS removed)
+#   * Docker volumes/data     (never renamed, copied, deleted, or reset)
+#   * bundler-download-cache  (stable external cache shared between clones)
 #   * local / generated       (local.properties, build/, .gradle/, .idea/,
 #                              log/, tmp/, storage/, .ruby-lsp/)
 #   * secrets                 (master.key + credentials.yml.enc, only when
@@ -152,6 +154,9 @@ namespace :scaffold do
 
   # Renames paths and rewrites contents in place, then prunes empty directories.
   def rename_in_place(root, excluded, content_repls, path_repls)
+    # Preserve the stable external Docker volume name while rewriting the app
+    # slug in files such as compose.yaml and devcontainer.json.
+    stable_volume_names = [ "bundler-download-cache" ]
     files = Dir.glob(File.join(root, "**", "*"), File::FNM_DOTMATCH).select { |p| File.file?(p) }
     files.each do |src|
       rel = rel_of(root, src)
@@ -160,7 +165,13 @@ namespace :scaffold do
 
       dst = File.join(root, *rel_path(rel, path_repls).split("/"))
       content = File.read(src, encoding: "UTF-8")
+      protected_names = stable_volume_names.each_with_index.map do |name, index|
+        token = "\u0000SCAFFOLD_SHARED_VOLUME_#{index}\u0000"
+        content = content.gsub(name, token)
+        [ token, name ]
+      end
       content_repls.each { |a, b| content = content.gsub(a, b) }
+      protected_names.each { |token, name| content = content.gsub(token, name) }
 
       if dst == src
         File.write(dst, content)

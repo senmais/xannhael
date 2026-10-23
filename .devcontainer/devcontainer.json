@@ -6,7 +6,7 @@
   "dockerComposeFile": "compose.yaml",
   "service": "rails-app",
   "workspaceFolder": "/workspaces/project",
-  "initializeCommand": "docker volume create xannhael-bundler-download-cache",
+  "initializeCommand": "docker volume create bundler-download-cache",
 
   // Use the standard non-root development user.
   "remoteUser": "vscode",
