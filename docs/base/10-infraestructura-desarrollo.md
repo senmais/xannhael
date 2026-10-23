@@ -130,7 +130,7 @@ por ello no se pudo medir una línea base de ejecución. No se estiman cifras.
 - El primer arranque de base es explícito: se revisa la conexión y se ejecuta
   `bin/rails db:prepare` a mano. Las bases de desarrollo y test reciben nombres
   derivados del slug que `scaffold:rename` escribe en `config/database.yml`.
-- Las imágenes del servicio local de PostgreSQL y de Selenium tienen etiquetas
+- Las imágenes del servicio local de PostgreSQL 18.6 y de Selenium tienen etiquetas
   fijas. PostgreSQL local y Selenium no tienen política de reinicio autónomo;
   se inician desde el perfil o bajo demanda.
 - Las gems instaladas y sus archivos de instalación quedan dentro del volumen

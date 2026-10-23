@@ -39,17 +39,19 @@ services:
   # ---------------------------------------------------------------------------
   # Optional local services.
   # ---------------------------------------------------------------------------
-  # Enable the local DB by setting COMPOSE_PROFILES=local-db and DB_HOST=db in
-  # the project .env, then rebuild the Dev Container. The DB has no host port;
-  # its Compose-scoped volume stays local to this clone.
+  # Disabled by default: Rails uses the shared PostgreSQL host above.
+  # To opt into an isolated database, set COMPOSE_PROFILES=local-db and
+  # DB_HOST=db in the project .env, then rebuild the Dev Container.
+  # PostgreSQL 18 stores data under /var/lib/postgresql/18/docker; mount the
+  # parent directory so the versioned data path persists in this clone's volume.
   db:
-    image: postgres:15.19
+    image: postgres:18.6
     profiles: [local-db]
     environment:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 10s

@@ -83,12 +83,13 @@ bin/rails lsp:check   # ver 08 · Pruebas y CI
 
 ## Base de datos: compartida (default) o local por proyecto
 
-Por defecto Compose no arranca PostgreSQL: Rails se conecta al host Docker en
-`host.docker.internal:55432`. El listener del host puede tener cualquier
+Por defecto Compose no arranca el servicio local `db`: Rails se conecta al host
+Docker en `host.docker.internal:55432`. El listener del host puede tener cualquier
 nombre; `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD` en `.env` definen
 la conexión. El ejemplo `postgres-db` del README escucha en el puerto `55432`.
 
-Si prefieres una base **aislada por proyecto**, inicia el servicio opcional:
+Solo si prefieres una base **aislada por proyecto**, habilita el perfil `local-db`
+en `.env`:
 
 ```bash
 # En .env, establece:
@@ -96,10 +97,13 @@ DB_HOST=db
 COMPOSE_PROFILES=local-db
 ```
 
-El servicio arranca junto a Rails en la misma red Compose, no publica un puerto
-al host y guarda sus datos en `postgres-data`, aislado por proyecto. Después de
-cambiar `.env`, reconstruye el Dev Container y ejecuta `bin/rails db:prepare`
-manualmente. Para un servidor PostgreSQL compartido, usa un usuario y permisos
+El servicio local usa PostgreSQL 18.6, arranca junto a Rails en la misma red
+Compose, no publica un puerto al host y guarda sus datos en `postgres-data`,
+aislado por proyecto. Después de cambiar `.env`, reconstruye el Dev Container y
+ejecuta `bin/rails db:prepare` manualmente. Si ya tienes datos creados con
+PostgreSQL 17 o anterior, PostgreSQL 18 no los abre directamente: respáldalos y
+planifica una actualización mayor antes de cambiar la imagen. Para un servidor
+PostgreSQL compartido, usa un usuario y permisos
 propios de la aplicación y configura sus dos bases Rails (`<slug>_development`
 y `<slug>_test`) antes de preparar la app.
 
