@@ -128,6 +128,9 @@ por ello no se pudo medir una línea base de ejecución. No se estiman cifras.
 - Las gems instaladas y sus archivos de instalación quedan dentro del volumen
   `bundle` de cada proyecto. No se comparte un árbol de instalación compatible
   solo por nombre: Ruby, arquitectura y extensiones nativas pueden diferir.
+- El contexto de la imagen Rails de producción excluye documentación, tests,
+  cliente Android, Procfile de desarrollo y configuración de agentes; no son
+  archivos de ejecución de esa imagen.
 
 La compilación y el arranque no se midieron porque el daemon Docker no estaba
 disponible en la sesión. Los checks de configuración locales pasan; consulta el

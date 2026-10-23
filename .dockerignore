@@ -45,6 +45,13 @@
 
 # Ignore development files
 /.devcontainer
+/.opencode
+/docs/
+/mobile/
+/test/
+/Procfile.dev
+/README.md
+/AGENTS.md
 
 # Ignore Docker-related files
 /.dockerignore
